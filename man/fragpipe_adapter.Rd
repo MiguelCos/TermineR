@@ -15,7 +15,7 @@ A data frame with at least 4 columns
 \usage{
 fragpipe_adapter(
   parent_dir,
-  ref_sample = NULL,
+  ref_sample = "norm",
   grouping_var = "nterm_modif_peptide",
   min_purity = 0.5,
   tmt_delta = "229"
