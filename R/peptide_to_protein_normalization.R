@@ -24,7 +24,7 @@
 #'  \item{protein_normalized_pepts_abundance}{Matrix of peptide abundances non-scaled, after extracting fraction of peptide/protein fraction of abundance}
 #'  \item{summarized_protein_abundance}{Summarized protein abundances based on peptide matrix}
 #'  \item{summarized_protein_abundance_scaled}{Summarized protein abundances based on peptide matrix, scaled}
-#'  \item{summarize_by_specificity}{Object showing if the protein abundances were summarized by tryptic peptides}
+#'  \item{summarize_by_specificity}{Object showing if the protein abundances were summarized by specific peptides}
 #'
 #' @export
 #' @author Miguel Cosenza-Contreras
