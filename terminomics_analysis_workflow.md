@@ -292,8 +292,8 @@ downstream analysis.
 ``` r
 pept2prot2gene <- annotated_df_quant %>%
   dplyr::select(nterm_modif_peptide, protein, peptide) %>%
-  distinct() %>% 
-  left_join(., prot2gene) 
+  left_join(., prot2gene) %>%
+  distinct() 
 
 pept2prot <- pept2prot2gene %>%
   dplyr::select(nterm_modif_peptide, protein) %>%
@@ -1027,7 +1027,6 @@ compar_tab_pept_protein_normalized_feat_fdr1 <- feature_fdr_correction(
 ``` r
 compar_tab_pept_protein_normalized_feat_fdr <- compar_tab_pept_protein_normalized_feat_fdr1 %>%
   left_join(.,peptide_data_n1_annotation) %>%
-  mutate(index = nterm_modif_peptide) %>%
   mutate(Feature = if_else(condition = adj.P.Val < 0.05 & fdr_correction == "feature-specific",
                         true = "Differentially abundant",
                         false = "Unchanged")) %>% 
@@ -1115,7 +1114,11 @@ volcano_pept_norm_limma3 <- ggplot(compar_tab_pept_protein_normalized_feat_fdr,
                 Feature-specific correction",
        subtitle = paste("Differentially abundant features = ",
                         nrow(KO_vs_WT_peptides_limma_table_n1_diff_feat_spec_fdr))) 
+
+                        dim(KO_vs_WT_peptides_limma_table_n1_diff_feat_spec_fdr)
 ```
+
+    [1] 1169   41
 
 Visualize both plots side-by-side:
 
