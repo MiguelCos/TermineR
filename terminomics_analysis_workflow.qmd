@@ -50,7 +50,6 @@ __Required R packages__
 library(TermineR)
 
 library(tidyverse)
-library(kableExtra)
 library(limma)
 library(clusterProfiler)
 library(org.Mm.eg.db)
