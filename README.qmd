@@ -122,7 +122,7 @@ Where:
 - `ref_sample` is the reference sample used for the TMT quantification, in case of multi-mixture experiments. In case of single-mixture experiments, `ref_sample` should be set to `NULL`.
 - `grouping_var` is the variable used to group the peptides. By default, the grouping is done by the N-terminal modified peptide sequence (`"nterm_modif_peptide"`).
 - `min_purity` is the minimum purity threshold for the peptides. By default, the threshold is set to 0.5.
-- `tmt_delta` is the mass difference between the TMT reporter ions. "229" for 10-plex TMT experiments and "304" for 6-plex TMT experiments.
+- `tmt_delta` is the mass difference between the TMT reporter ions. "229" for 10-plex TMT experiments and "304" for 16-plex TMT experiments.
 
 ### DiaNN adapter
 
@@ -186,7 +186,7 @@ Where:
     Examples:
       - Trypsin would require `sense = "C"` and `specificity = "K|R"`.
       - Lysarginase would require `sense = "N"` and `specificity = "K|R"`.
-- `organism` is the organism used in the search. By default, the value is set to `"mouse"`. Currently only mouse is supported. But other organisms will be included in the near future.
+- `organism` is the organism used in the search. By default, the value is set to `"mouse"`. Currently humand and mouse is supported. Other organisms can be included upon request.
 
 ## Visualization of cleavage sites
 

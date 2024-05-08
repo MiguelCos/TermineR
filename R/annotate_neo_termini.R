@@ -260,10 +260,15 @@ mol_processing_feat <- c("INIT_MET",
 
 if(organism == "mouse"){
 
-  data("mouse_uniprot_processing", package = "TermineR")
+  uniprot_processing <- data("mouse_uniprot_processing", package = "TermineR")
+
+  } else if (condition == "human"){
+  
+  uniprot_processing <- data("human_uniprot_processing", package = "TermineR")
+
   }
 
-df_mol_proc_feat <- mouse_uniprot_processing %>%
+df_mol_proc_feat <- uniprot_processing %>%
   dplyr::filter(
     type %in% mol_processing_feat, # keep only interesting features
                 !is.na(length)) %>% # exclude features with missing values

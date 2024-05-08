@@ -161,7 +161,7 @@ Where:
 - `min_purity` is the minimum purity threshold for the peptides. By
   default, the threshold is set to 0.5.
 - `tmt_delta` is the mass difference between the TMT reporter ions.
-  “229” for 10-plex TMT experiments and “304” for 6-plex TMT
+  “229” for 10-plex TMT experiments and “304” for 16-plex TMT
   experiments.
 
 ### DiaNN adapter
@@ -247,8 +247,8 @@ Where:
     - Trypsin would require `sense = "C"` and `specificity = "K|R"`.
     - Lysarginase would require `sense = "N"` and `specificity = "K|R"`.
 - `organism` is the organism used in the search. By default, the value
-  is set to `"mouse"`. Currently only mouse is supported. But other
-  organisms will be included in the near future.
+  is set to `"mouse"`. Currently humand and mouse is supported. Other
+  organisms can be included upon request.
 
 ## Visualization of cleavage sites
 
