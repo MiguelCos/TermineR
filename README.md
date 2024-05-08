@@ -302,7 +302,7 @@ distribution of p-values, this method can offer increased sensitivity
 for the detection of differentially abundant features.
 
 For a specific example on how to use the `feature_fdr_correction`
-function, please refer our terminomics analysis example workflow. But at
+function, please refer our [terminomics analysis example workflow](https://github.com/MiguelCos/TermineR/blob/main/terminomics_analysis_workflow.md). But at
 a glance, the basic usage of the `feature_fdr_correction` function is as
 follows:
 
@@ -508,7 +508,7 @@ TMT experiment and searched with the FragPipe search engine. The
 workflow includes differential abundance analysis with the *limma*
 package, feature-specific FDR correction, and visualization of the
 results. Users can access the extended example in this repository
-following this \[link\].
+following this [link](https://github.com/MiguelCos/TermineR/blob/main/terminomics_analysis_workflow.md).
 
 ``` r
 sessionInfo()
