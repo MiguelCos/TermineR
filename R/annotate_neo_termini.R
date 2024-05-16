@@ -262,7 +262,7 @@ if(organism == "mouse"){
 
   uniprot_processing <- data("mouse_uniprot_processing", package = "TermineR")
 
-  } else if (condition == "human"){
+  } else if (organism == "human"){
   
   uniprot_processing <- data("human_uniprot_processing", package = "TermineR")
 
