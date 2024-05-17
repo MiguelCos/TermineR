@@ -221,8 +221,8 @@ protein_nterm_modif <- annotated_df_w_quant %>%
     p1_prime_residue,
     protein_length) %>%
   dplyr::filter(str_detect(protein,
-                            pattern = "Biognosys",
-                            negate = TRUE),
+                           pattern = "Biognosys",
+                           negate = TRUE),
                 nterm_modif != "n")
 
 protein_semi_free <- annotated_df_w_quant %>%
@@ -262,10 +262,18 @@ if(organism == "mouse"){
 
   uniprot_processing <- data("mouse_uniprot_processing", package = "TermineR")
 
+  uniprot_processing <- mouse_uniprot_processing
+  
+  rm(human_uniprot_processing)
+
   } else if (organism == "human"){
   
   uniprot_processing <- data("human_uniprot_processing", package = "TermineR")
 
+  uniprot_processing <- human_uniprot_processing
+
+  rm(human_uniprot_processing)
+  
   }
 
 df_mol_proc_feat <- uniprot_processing %>%
