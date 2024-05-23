@@ -46,7 +46,7 @@ fragpipe_adapter <- function(parent_dir,
 
   # required functions ------
 
-  ## function to read the annotation files 
+  ## function to read the annotation files
 
   read_annotation_files <- function(x){
 
@@ -55,7 +55,7 @@ fragpipe_adapter <- function(parent_dir,
 
       # read the annotation file
       annot <- read_delim(file = x,
-                          delim = " ", 
+                          delim = " ",
                           col_names = FALSE) %>%
       dplyr::rename(channel =  X1,
                     sample_name = X2)
@@ -75,31 +75,31 @@ fragpipe_adapter <- function(parent_dir,
     require(dplyr)
     require(stringr)
 
-    # tmt delta: 229 for TMT10/11plex 
+    # tmt delta: 229 for TMT10/11plex
 
     # check if there is an 'empty' column in the psm dataframe and the annotation
 
     if(any(str_detect(colnames(x$psm), "empty"))){
 
-      x$psm <- x$psm %>% 
-        dplyr::select(-matches("empty")) 
+      x$psm <- x$psm %>%
+        dplyr::select(-matches("empty"))
 
     }
 
     if("empty" %in% x$annot$sample_name){
 
-      x$annot <- x$annot %>% 
+      x$annot <- x$annot %>%
         dplyr::filter(sample_name != "empty")
 
     }
 
-    x$psm <- x$psm %>% 
+    x$psm <- x$psm %>%
       # in all_of sample columns, substitute zero values with NA
       mutate(across(all_of(x$annot$sample_name),
                     ~case_when(. == 0 ~ NA,
-                               TRUE ~ .))) 
+                               TRUE ~ .)))
 
-    # keep interesting columns 
+    # keep interesting columns
     sample_cols <- x$annot$sample_name
 
     interest_cols <- c("Peptide",
@@ -115,8 +115,8 @@ fragpipe_adapter <- function(parent_dir,
 
     # select the psm dataframe to keep only the selected columns
     filtered_psm <- x$psm %>%
-      dplyr::select(all_of(cols_to_keep)) %>% 
-      mutate(sum_reporter_ions = rowSums(dplyr::select(., all_of(sample_cols)), na.rm = TRUE)) %>% 
+      dplyr::select(all_of(cols_to_keep)) %>%
+      mutate(sum_reporter_ions = rowSums(dplyr::select(., all_of(sample_cols)), na.rm = TRUE)) %>%
       # create new peptide identification based on N-terminal modifications + peptide sequence
       mutate(
       # annotate N-termini
@@ -128,7 +128,7 @@ fragpipe_adapter <- function(parent_dir,
         str_detect(`Assigned Modifications`, "N-term\\(36.075[0-9]\\)") ~ "Dimethyl",
         TRUE ~ "n"
         )
-      ) %>% 
+      ) %>%
     mutate(
       nterm_modif_peptide = paste(
         nterminal_modification,
@@ -152,18 +152,18 @@ fragpipe_adapter <- function(parent_dir,
     # then select the PSMs with highest summed TMT intensity
     slice_max(n = 1,
               order_by = sum_reporter_ions) %>%
-    ungroup() 
+    ungroup()
 
     if(!is.null(ref_sample)){
 
-    filtered_psm <- filtered_psm %>% 
+    filtered_psm <- filtered_psm %>%
       filter(.data[[ref_sample]] > 0)
     }
 
-    annot <- x$annot 
+    annot <- x$annot
 
     # Return the list with the filtered psm dataframe and the original annot dataframe
-    return(list(psm = filtered_psm, 
+    return(list(psm = filtered_psm,
                 annot = annot))
 
   }
@@ -172,11 +172,11 @@ fragpipe_adapter <- function(parent_dir,
   # this function will correct for reference channel within each mixture
   # and summarize abundances by modified peptide, peptide, protein, and gene
 
-  mad_scaling <- function(x, 
-                          ref_sample = "sc", 
+  mad_scaling <- function(x,
+                          ref_sample = "sc",
                           grouping_var = "Protein ID",
                           mixture_col) {
-                          
+
     require(dplyr)
     require(tidyr)
 
@@ -190,7 +190,7 @@ fragpipe_adapter <- function(parent_dir,
                        "Protein ID",
                        "Gene")
 
-    # keep interesting columns 
+    # keep interesting columns
     sample_cols <- x$annot$sample_name
 
     cols_to_keep <- c(sample_cols, interest_cols)
@@ -200,7 +200,7 @@ fragpipe_adapter <- function(parent_dir,
     # select the psm dataframe to keep only the selected columns
     scaled_ratios <- x$psm %>%
     mutate(across(all_of(sample_cols),
-                  ~log2(.) - log2(.data[[ref_sample]]), 
+                  ~log2(.) - log2(.data[[ref_sample]]),
                   .names = "ratio_{.col}"))
     } else {
 
@@ -211,7 +211,7 @@ fragpipe_adapter <- function(parent_dir,
                     ~case_when(. == 0 ~ NA,
                                TRUE ~ .))) %>%
     mutate(across(all_of(sample_cols),
-                  ~log2(.), 
+                  ~log2(.),
                   .names = "ratio_{.col}"))
 
     }
@@ -234,12 +234,12 @@ fragpipe_adapter <- function(parent_dir,
                  values_to = "log2_ratio_2_ref") %>%
 
     # calculate median ratios per desired level, per sample
-    group_by(.data[[grouping_var]], sample) %>% 
-    summarize(log2_rat2ref_group = median(log2_ratio_2_ref, 
+    group_by(.data[[grouping_var]], sample) %>%
+    summarize(log2_rat2ref_group = median(log2_ratio_2_ref,
                                           na.rm = TRUE),
               .groups = "drop") %>%
 
-    # calculate median ratios per sample 
+    # calculate median ratios per sample
     group_by(sample) %>%
     mutate(Mi = median(log2_rat2ref_group,
                        na.rm = TRUE)) %>%
@@ -254,7 +254,7 @@ fragpipe_adapter <- function(parent_dir,
 
     # calculate median absolute deviation per sample
     group_by(sample) %>%
-    mutate(MADi = median(abs(RCij), 
+    mutate(MADi = median(abs(RCij),
                          na.rm = TRUE)) %>%
     ungroup() %>%
 
@@ -265,7 +265,7 @@ fragpipe_adapter <- function(parent_dir,
 
     # calculate scaled ratios
     mutate(RNij = (RCij / MADi) * MAD0 + M0) %>%
-    mutate(mixture = mixture_col) 
+    mutate(mixture = mixture_col)
 
     return(scaled_ratios)
 
@@ -273,17 +273,17 @@ fragpipe_adapter <- function(parent_dir,
 
   # function to calculate the reference intensity across mixtures
 
-  calculate_ref_intensity <- function(x, 
+  calculate_ref_intensity <- function(x,
                                       grouping_var = "Protein ID",
                                       ref_sample = "sc",
                                       mixture_col) {
-                                      
+
     require(dplyr)
     require(tidyr)
 
     if(!is.null(ref_sample)){
 
-    # keep interesting columns 
+    # keep interesting columns
     sample_cols <- x$annot$sample_name
 
     # define interesting columns
@@ -302,20 +302,20 @@ fragpipe_adapter <- function(parent_dir,
     reference_intensity <- x$psm %>%
     dplyr::select(all_of(c(grouping_var, sample_cols, "Intensity"))) %>%
     # select the top 3 most intense PSMs per grouping variable
-    slice_max(order_by = Intensity, 
-              by = .data[[grouping_var]], 
+    slice_max(order_by = Intensity,
+              by = .data[[grouping_var]],
               n = 3) %>%
 
     # calculate the sum of reporter ions
-    mutate(sum_reporter_ions = rowSums(dplyr::select(., 
-                                                     all_of(sample_cols)), 
+    mutate(sum_reporter_ions = rowSums(dplyr::select(.,
+                                                     all_of(sample_cols)),
                                        na.rm = TRUE)) %>%
-    
+
     # calculate the weighted intensity
     mutate(weighted_intensity = Intensity * (.data[[ref_sample]] / sum_reporter_ions)) %>%
 
     # group by the grouping variable and calculate the reference intensity per grouping variable in each mixture
-    group_by(.data[[grouping_var]]) %>% 
+    group_by(.data[[grouping_var]]) %>%
     summarise(REFik = sum(weighted_intensity),
               .groups = 'drop') %>%
     # add the mixture column
@@ -326,25 +326,25 @@ fragpipe_adapter <- function(parent_dir,
 
     }
 
-  
+
   return(reference_intensity)
 
   }
 
-  # Function to calculate the final abundance values including the refenrece intensity 
+  # Function to calculate the final abundance values including the refenrece intensity
 
-  calculate_final_abundance <- function(scaled_ratios = scaled_ratios, 
+  calculate_final_abundance <- function(scaled_ratios = scaled_ratios,
                                         reference_intensity = reference_intensity,
                                         ref_sample = NULL,
                                         grouping_var = "nterm_modif_peptide") {
-                                        
+
     require(dplyr)
     require(tidyr)
 
     if(!is.null(ref_sample)){
 
-    # merge the reference intensity dataframes from reference_intensity list 
-    ref_int_df <- bind_rows(reference_intensity) %>% 
+    # merge the reference intensity dataframes from reference_intensity list
+    ref_int_df <- bind_rows(reference_intensity) %>%
 
     # calculate the overall reference intensity per grouping variable
     group_by(.data[[grouping_var]]) %>%
@@ -356,7 +356,7 @@ fragpipe_adapter <- function(parent_dir,
       bind_rows(scaled_ratios), # scaled_ratios dataframes
       ref_int_df,
       by = c(grouping_var, "mixture")
-    ) %>% 
+    ) %>%
     # calculate the final abundance values
     mutate(ref_normalized_abundance = RNij + log2(REFi, na.rm = TRUE))
 
@@ -382,7 +382,7 @@ fragpipe_adapter <- function(parent_dir,
 
   # start execution ------
 
-  # load the data 
+  # load the data
 
   # Construct the path to the psm.tsv files
 
@@ -400,7 +400,7 @@ fragpipe_adapter <- function(parent_dir,
     psm_file_path <- paste0(folders_dir, "/psm.tsv")
 
   } else {
-    
+
     intern_foldrs <- "mix_1"
 
     folders_dir <- parent_dir
@@ -408,11 +408,11 @@ fragpipe_adapter <- function(parent_dir,
     psm_file_path <- paste0(parent_dir, "/psm.tsv")
 
   }
-  
+
   # get a list of psm.tsv files
   message("Loading psm.tsv files...")
   list_psms <- purrr::map(.x = psm_file_path,
-                          .f = read_tsv, 
+                          .f = read_tsv,
                           .progress = TRUE) %>%
                           suppressMessages()
 
@@ -423,7 +423,7 @@ fragpipe_adapter <- function(parent_dir,
 
   # define location
   message("Loading annotation files...")
-  annot_file_path2 <- paste0(folders_dir, 
+  annot_file_path2 <- paste0(folders_dir,
                             "/annotation.txt")
 
   # load annotation files
@@ -442,13 +442,13 @@ fragpipe_adapter <- function(parent_dir,
                               .progress = TRUE) %>%
                           suppressMessages()
 
-  # filter the PSM files and generate summarization based on 
+  # filter the PSM files and generate summarization based on
   # Nterminal modification + peptide sequence
-  
+
   message("Filtering PSM files...")
 
   psms_cols <- purrr::map(.x = combined_list,
-                          .f = filter_psms, 
+                          .f = filter_psms,
                           ref_sample = ref_sample,
                           tmt_delta = tmt_delta,
                           min_purity = min_purity,
@@ -459,7 +459,7 @@ fragpipe_adapter <- function(parent_dir,
   message("Calculating reference scaling factors and normalizing...")
   scaled_ratios <- purrr::map2(psms_cols,
                                names(psms_cols),
-                               ~mad_scaling(.x, 
+                               ~mad_scaling(.x,
                                             ref_sample = ref_sample,
                                             grouping_var = grouping_var,
                                             mixture_col = .y),
@@ -467,7 +467,7 @@ fragpipe_adapter <- function(parent_dir,
 
   reference_intensity <- purrr::map2(psms_cols,
                                      names(psms_cols),
-                                     ~calculate_ref_intensity(.x, 
+                                     ~calculate_ref_intensity(.x,
                                                               ref_sample = ref_sample,
                                                               grouping_var = grouping_var,
                                                               mixture_col = .y))
@@ -489,7 +489,7 @@ fragpipe_adapter <- function(parent_dir,
 
   peptide2protein_map <- bind_rows(
     list_psms
-  ) %>% 
+  ) %>%
   dplyr::select(
     peptide = Peptide,
     protein = `Protein ID`) %>%
@@ -499,7 +499,7 @@ fragpipe_adapter <- function(parent_dir,
     tidyr::separate(col = nterm_modif_peptide,
                     into = c("nterm_modif", "peptide"),
                     sep = "_",
-                    remove = FALSE) %>%    
+                    remove = FALSE) %>%
     left_join(peptide2protein_map, by = "peptide") %>%
     dplyr::relocate(protein, .after = peptide) %>%
     # arrange by peptide sequence
@@ -809,7 +809,135 @@ diann_adapter <- function(
 
   return(scaled_diann_df_mat_min)
 }
+#' Process psm.tsv files from FragPipe label-free search results for further analysis with TermineR
+#'
+#' @title fragpipe_lf_adapter
+#' @param parent_dir directory of FragPipe search results
+#' @param annotation_file_path path to the annotation file with sample names. It should contain at least two colums: `run`, matching the name of the LC-MS/MS run, and `sample_name`, with a readable sample identifier.
+#' @param grouping_var define the grouping variable for MAD scaling. Default is "nterm_modif_peptide" for normalization at the feature level of "Peptide + N-terminal modification".
+#'
+#' @format A data frame with at least 4 columns
+#' \describe{
+#'  \item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
+#'  \item{nterm_modif}{N-terminal modification}
+#'  \item{peptide}{Peptide sequence}
+#'  \item{protein}{Protein ID based on Uniprot Accession}
+#' }
+#'
+#'
+#' @description
+#' Process psm.tsv files from FragPipe search results for further analysis with TermineR
+#'
+#' @importFrom dplyr mutate filter select bind_rows left_join group_by summarize ungroup arrange distinct slice_max
+#' @importFrom tidyr pivot_wider separate
+#' @importFrom stringr str_detect str_remove
+#' @importFrom readr read_tsv
+#' @importFrom here here
+#' @importFrom magrittr %>%
+#'
+#' @export
+#' @author Miguel Cosenza-Contreras
+fragpipe_lf_adapter <- function(
+  parent_dir,
+  annotation_file_path,
+  grouping_var) {
 
+  interest_cols <- c("Spectrum File",
+                     "Peptide",
+                     "Modified Peptide",
+                     "PeptideProphet Probability",
+                     "Intensity",
+                     "Assigned Modifications",
+                     "Is Unique",
+                     "Protein ID",
+                     "Gene")
 
+psm_tsv <- read_tsv(paste0(parent_dir,"/psm.tsv"))
 
+annotation_txt <- read_tsv(annotation_file_path) %>%
+  na.omit()
 
+psm_tsv_sel <- psm_tsv %>%
+    dplyr::select(all_of(interest_cols)) %>%
+    mutate(run = basename(`Spectrum File`)) %>%
+    mutate(run = str_remove(run, ".pep.xml")) %>%
+    mutate(run = str_remove(run, "interact-")) %>%
+    dplyr::select(-`Spectrum File`) %>%
+    left_join(annotation_txt) %>%
+    mutate(
+      nterminal_modification = case_when(
+        str_detect(`Assigned Modifications`, "N-term\\(304.207[0-9]\\)") ~ "TMT",
+        str_detect(`Assigned Modifications`, "N-term\\(229.162[0-9]\\)") ~ "TMT",
+        str_detect(`Assigned Modifications`, "N-term\\(42.010[0-9]\\)") ~ "Acetyl",
+        str_detect(`Assigned Modifications`, "N-term\\(28.031[0-9]\\)") ~ "Dimethyl",
+        str_detect(`Assigned Modifications`, "N-term\\(36.075[0-9]\\)") ~ "Dimethyl",
+        str_detect(`Assigned Modifications`, "N-term\\(34.063[0-9]\\)") ~ "Dimethyl",
+        TRUE ~ "n"
+      )
+    ) %>%
+    mutate(
+      nterm_modif_peptide = paste(
+        nterminal_modification,
+        Peptide,
+        sep = "_"
+      )
+    ) %>%
+    dplyr::rename(
+      peptide = Peptide,
+      protein = `Protein ID`,
+      intensity = Intensity,
+      sample = sample_name
+    ) %>%
+    dplyr::select(
+      nterm_modif_peptide,
+      intensity,
+      peptide,
+      protein,
+      sample)
+
+  scaled_ratios <- psm_tsv_sel %>%
+    mutate(log2_intensity = log2(intensity)) %>%
+    group_by(.data[[grouping_var]], sample) %>%
+    summarize(log2_rat2ref_group = median(log2_intensity, na.rm = TRUE), .groups = "drop") %>%
+    group_by(sample) %>%
+    mutate(Mi = median(log2_rat2ref_group, na.rm = TRUE)) %>%
+    ungroup() %>%
+    mutate(M0 = median(Mi, na.rm = TRUE)) %>%
+    mutate(RCij = log2_rat2ref_group - Mi) %>%
+    group_by(sample) %>%
+    mutate(MADi = median(abs(RCij), na.rm = TRUE)) %>%
+    ungroup() %>%
+    mutate(MAD0 = median(MADi, na.rm = TRUE)) %>%
+    ungroup() %>%
+    mutate(RNij = (RCij / MADi) * MAD0 + M0) %>%
+    mutate(RNij = case_when(
+      RNij == -Inf ~ NA,
+      RNij == Inf ~ NA,
+      TRUE ~ RNij
+    ))
+
+  pept2prot2modif <- psm_tsv_sel %>%
+    dplyr::select(
+      nterm_modif_peptide,
+      peptide,
+      protein) %>%
+    distinct()
+
+  df_final_abundance <- scaled_ratios %>%
+    dplyr::select(all_of(c(grouping_var, "sample", "RNij"))) %>%
+    mutate(
+      sample = str_remove(sample, "ratio_"),
+    ) %>%
+    pivot_wider(
+      names_from = "sample",
+      values_from = "RNij"
+    ) %>%
+    left_join(pept2prot2modif, by = "nterm_modif_peptide") %>%
+    dplyr::relocate(
+      nterm_modif_peptide,
+      peptide,
+      protein
+    )
+
+  return(df_final_abundance)
+}
