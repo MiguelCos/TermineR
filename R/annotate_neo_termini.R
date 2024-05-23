@@ -264,7 +264,7 @@ if(organism == "mouse"){
 
   uniprot_processing <- mouse_uniprot_processing
   
-  rm(human_uniprot_processing)
+  rm(mouse_uniprot_processing)
 
   } else if (organism == "human"){
   
@@ -274,7 +274,15 @@ if(organism == "mouse"){
 
   rm(human_uniprot_processing)
   
-  }
+  } else if(organism == "mendicato_trucantula"){
+
+  uniprot_processing <- data("mendicato_trucantula_uniprot_processing", package = "TermineR")
+
+  uniprot_processing <- mendicato_trucantula_uniprot_processing
+
+  rm(mendicato_trucantula_uniprot_processing)
+
+  } 
 
 df_mol_proc_feat <- uniprot_processing %>%
   dplyr::filter(

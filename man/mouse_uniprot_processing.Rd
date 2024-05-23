@@ -25,7 +25,6 @@ Uniprot API (queried on April 2024)
 mouse_uniprot_processing
 }
 \description{
-Annotation table of samples and conditions for use case experiment of
-polycystic kidney disease in mice.
+Tabular annotation of processing information as obtained from Uniprot API
 }
 \keyword{datasets}
