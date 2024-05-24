@@ -200,7 +200,7 @@ fragpipe_adapter <- function(parent_dir,
     # select the psm dataframe to keep only the selected columns
     scaled_ratios <- x$psm %>%
     mutate(across(all_of(sample_cols),
-                  ~log2(.) - log2(.data[[ref_sample]]),
+                  ~log2(. + 12) - log2(.data[[ref_sample]] + 12),
                   .names = "ratio_{.col}"))
     } else {
 
@@ -211,7 +211,7 @@ fragpipe_adapter <- function(parent_dir,
                     ~case_when(. == 0 ~ NA,
                                TRUE ~ .))) %>%
     mutate(across(all_of(sample_cols),
-                  ~log2(.),
+                  ~log2(. + 12),
                   .names = "ratio_{.col}"))
 
     }
@@ -358,7 +358,7 @@ fragpipe_adapter <- function(parent_dir,
       by = c(grouping_var, "mixture")
     ) %>%
     # calculate the final abundance values
-    mutate(ref_normalized_abundance = RNij + log2(REFi, na.rm = TRUE))
+    mutate(ref_normalized_abundance = RNij + log2(REFi))
 
     } else {
 
@@ -475,6 +475,7 @@ fragpipe_adapter <- function(parent_dir,
   message("Calculating final scaled abundances...")
   final_abundance <-  calculate_final_abundance(scaled_ratios = scaled_ratios,
                                                 reference_intensity = reference_intensity,
+                                                ref_sample = ref_sample,
                                                 grouping_var = grouping_var)
 
   df_final_abundance <- final_abundance %>%
