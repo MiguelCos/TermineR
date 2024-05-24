@@ -277,7 +277,7 @@ count_matches_plot <- ggplot(count_matches,
 print(count_matches_plot)
 ```
 
-# Quantitative analysis of Semi-specific peptides
+# Quantitative analysis of Neo-termini
 
 After annotation, we can use the standardized quantitative information to evaluate the differential abundance of semi-specific peptides or proteolytic products between conditions.
 
@@ -370,7 +370,7 @@ data_pept_raw_se_nona <- SummarizedExperiment(
                                               )
 ```
 
-## % of total summed abundance of semi-specific peptides by the total summed abundance of all peptides (raw intensities)
+## % of total summed abundance of neo-termini by the total summed abundance of all peptides (raw intensities)
 
 As an exemplary exploratory analysis, we showcase the calculation of the percentage of total summed abundance of proteolytic products (defined by peptides labelled with TMT in the N-termini, in this experiment) by the total summed abundance of all peptides (raw intensities). 
 
@@ -451,7 +451,7 @@ print(boxplots_percentages)
 
 The plot shows that in general, the percentage of proteolytic products is similar between the two conditions.
 
-# Differential abundance analysis of semi-specific peptides (without protein-level normalization)
+# Differential abundance analysis of neo-termini (without protein-level normalization)
 
 Now we can move forward with differential abundance analysis, to pinpoint proteolytic products that are differentially abundant between experimental conditions.
 
@@ -573,7 +573,7 @@ compar_tab_feat_fdr <-  compar_tab_feat_fdr %>%
                                               "Down-regulated")))
 ```
 
-# Differential abundance analysis of semi-specific peptides (after protein-level normalization)
+# Differential abundance analysis of neo-termini (after protein-level normalization)
 
 We need to normalize the peptide abundances based on the abundances of the proteins they belong to. This is done using the `peptide2protein_normalization` function.
 

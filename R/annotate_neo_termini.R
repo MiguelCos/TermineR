@@ -260,7 +260,7 @@ mol_processing_feat <- c("INIT_MET",
 
 if(organism == "mouse"){
 
-  uniprot_processing <- data("mouse_uniprot_processing", package = "TermineR")
+  data("mouse_uniprot_processing", package = "TermineR")
 
   uniprot_processing <- mouse_uniprot_processing
   
@@ -268,7 +268,7 @@ if(organism == "mouse"){
 
   } else if (organism == "human"){
   
-  uniprot_processing <- data("human_uniprot_processing", package = "TermineR")
+  data("human_uniprot_processing", package = "TermineR")
 
   uniprot_processing <- human_uniprot_processing
 
@@ -276,7 +276,7 @@ if(organism == "mouse"){
   
   } else if(organism == "mendicato_trucantula"){
 
-  uniprot_processing <- data("mendicato_trucantula_uniprot_processing", package = "TermineR")
+  data("mendicato_trucantula_uniprot_processing", package = "TermineR")
 
   uniprot_processing <- mendicato_trucantula_uniprot_processing
 

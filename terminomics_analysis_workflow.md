@@ -1,74 +1,6 @@
-Terminomics analysis of proteolytic processing in polycystic kidney
+# Terminomics analysis of proteolytic processing in polycystic kidney
 disease in mice
-================
 Miguel Cosenza-Contreras and Adrianna Seredynska
-
-- <a
-  href="#background-and-general-description-of-the-data-analysis-approach"
-  id="toc-background-and-general-description-of-the-data-analysis-approach"><span
-  class="toc-section-number">1</span> Background and general description
-  of the data analysis approach</a>
-- <a href="#general-experimental-information"
-  id="toc-general-experimental-information"><span
-  class="toc-section-number">2</span> General experimental information</a>
-- <a
-  href="#short-description-of-database-search-and-quantitation-approach"
-  id="toc-short-description-of-database-search-and-quantitation-approach"><span
-  class="toc-section-number">3</span> Short description of database search
-  and quantitation approach</a>
-- <a href="#required-r-packages" id="toc-required-r-packages"><span
-  class="toc-section-number">4</span> Required R packages</a>
-- <a href="#load-required-data" id="toc-load-required-data"><span
-  class="toc-section-number">5</span> Load required data</a>
-- <a href="#annotation-of-peptide-specificities"
-  id="toc-annotation-of-peptide-specificities"><span
-  class="toc-section-number">6</span> Annotation of peptide
-  specificities</a>
-- <a
-  href="#visualization-of-peptide-counts-by-n-terminal-modification-and-specificity"
-  id="toc-visualization-of-peptide-counts-by-n-terminal-modification-and-specificity"><span
-  class="toc-section-number">7</span> Visualization of peptide counts by
-  N-terminal modification and specificity</a>
-- <a
-  href="#annotation-of-protein-termini-by-uniprot-annotated-processing-information"
-  id="toc-annotation-of-protein-termini-by-uniprot-annotated-processing-information"><span
-  class="toc-section-number">8</span> Annotation of protein termini by
-  Uniprot-annotated processing information</a>
-- <a href="#quantitative-analysis-of-semi-specific-peptides"
-  id="toc-quantitative-analysis-of-semi-specific-peptides"><span
-  class="toc-section-number">9</span> Quantitative analysis of
-  Semi-specific peptides</a>
-- <a
-  href="#differential-abundance-analysis-of-semi-specific-peptides-without-protein-level-normalization"
-  id="toc-differential-abundance-analysis-of-semi-specific-peptides-without-protein-level-normalization"><span
-  class="toc-section-number">10</span> Differential abundance analysis of
-  semi-specific peptides (without protein-level normalization)</a>
-- <a
-  href="#differential-abundance-analysis-of-semi-specific-peptides-after-protein-level-normalization"
-  id="toc-differential-abundance-analysis-of-semi-specific-peptides-after-protein-level-normalization"><span
-  class="toc-section-number">11</span> Differential abundance analysis of
-  semi-specific peptides (after protein-level normalization)</a>
-- <a href="#visualization-of-differential-abundance-results"
-  id="toc-visualization-of-differential-abundance-results"><span
-  class="toc-section-number">12</span> Visualization of differential
-  abundance results</a>
-- <a
-  href="#analysis-of-proteolytic-patterns-from-differential-proteolysis"
-  id="toc-analysis-of-proteolytic-patterns-from-differential-proteolysis"><span
-  class="toc-section-number">13</span> Analysis of proteolytic patterns
-  from differential proteolysis</a>
-- <a href="#comparative-analysis-of-neo-termini-vs-protein-abundance"
-  id="toc-comparative-analysis-of-neo-termini-vs-protein-abundance"><span
-  class="toc-section-number">14</span> Comparative analysis of neo-termini
-  vs protein abundance</a>
-- <a href="#differential-abundance-analysis-of-protein-abundance"
-  id="toc-differential-abundance-analysis-of-protein-abundance"><span
-  class="toc-section-number">15</span> Differential abundance analysis of
-  protein abundance</a>
-- <a href="#generate-tabular-summary-of-results"
-  id="toc-generate-tabular-summary-of-results"><span
-  class="toc-section-number">16</span> Generate tabular summary of
-  results</a>
 
 # Background and general description of the data analysis approach
 
@@ -123,7 +55,6 @@ if (!require("TermineR", quietly = TRUE))
 library(TermineR)
 
 library(tidyverse)
-library(kableExtra)
 library(limma)
 library(clusterProfiler)
 library(org.Mm.eg.db)
@@ -362,7 +293,7 @@ semi_counts_barplot <- ggplot(annot_counts,
 print(semi_counts_barplot)
 ```
 
-![](terminomics_analysis_workflow_files/figure-gfm/unnamed-chunk-11-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-11-1.png)
 
 # Annotation of protein termini by Uniprot-annotated processing information
 
@@ -426,9 +357,9 @@ count_matches_plot <- ggplot(count_matches,
 print(count_matches_plot)
 ```
 
-![](terminomics_analysis_workflow_files/figure-gfm/unnamed-chunk-13-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-13-1.png)
 
-# Quantitative analysis of Semi-specific peptides
+# Quantitative analysis of Neo-termini
 
 After annotation, we can use the standardized quantitative information
 to evaluate the differential abundance of semi-specific peptides or
@@ -538,7 +469,7 @@ data_pept_raw_se_nona <- SummarizedExperiment(
                                               )
 ```
 
-## % of total summed abundance of semi-specific peptides by the total summed abundance of all peptides (raw intensities)
+## % of total summed abundance of neo-termini by the total summed abundance of all peptides (raw intensities)
 
 As an exemplary exploratory analysis, we showcase the calculation of the
 percentage of total summed abundance of proteolytic products (defined by
@@ -621,12 +552,12 @@ boxplots_percentages <- ggplot(pept_summ_rawpur_semi_3,
 print(boxplots_percentages)
 ```
 
-![](terminomics_analysis_workflow_files/figure-gfm/unnamed-chunk-23-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-23-1.png)
 
 The plot shows that in general, the percentage of proteolytic products
 is similar between the two conditions.
 
-# Differential abundance analysis of semi-specific peptides (without protein-level normalization)
+# Differential abundance analysis of neo-termini (without protein-level normalization)
 
 Now we can move forward with differential abundance analysis, to
 pinpoint proteolytic products that are differentially abundant between
@@ -782,7 +713,7 @@ compar_tab_feat_fdr <-  compar_tab_feat_fdr %>%
                                               "Down-regulated")))
 ```
 
-# Differential abundance analysis of semi-specific peptides (after protein-level normalization)
+# Differential abundance analysis of neo-termini (after protein-level normalization)
 
 We need to normalize the peptide abundances based on the abundances of
 the proteins they belong to. This is done using the
@@ -1129,7 +1060,7 @@ cowplot::plot_grid(
   nrow = 1)
 ```
 
-![](terminomics_analysis_workflow_files/figure-gfm/unnamed-chunk-47-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-47-1.png)
 
 We can observe that 1169 proteolytic products as differentially abundant
 after normalization by protein abundance, while we have 1341 before
@@ -1190,7 +1121,7 @@ pheatmap(upregulated_cleavage_area_counts$amino_acid_count,
         color = colorRampPalette(brewer.pal(n = 9, name = "Reds"))(100))
 ```
 
-![](terminomics_analysis_workflow_files/figure-gfm/unnamed-chunk-51-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-51-1.png)
 
 We see that several of our up-regulated proteolytic products contain C
 or S at the P1 position.
@@ -1366,7 +1297,7 @@ ggplot(log2FCpept_vs_log2FCprots_1,
   ggtitle(label = "Diff. abund. neo-termini vs protein abundance")
 ```
 
-![](terminomics_analysis_workflow_files/figure-gfm/unnamed-chunk-57-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-57-1.png)
 
 ## Scatter plot labelled with specific proteolytic products
 
@@ -1440,7 +1371,7 @@ ggplot(log2FCpept_vs_log2FCprots_1,
   ggtitle(label = "Diff. abund. neo-termini vs protein abundance")
 ```
 
-![](terminomics_analysis_workflow_files/figure-gfm/unnamed-chunk-60-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-60-1.png)
 
 # Differential abundance analysis of protein abundance
 
@@ -1575,7 +1506,7 @@ ggplot(KO_vs_WT_protein_limma,
     )
 ```
 
-![](terminomics_analysis_workflow_files/figure-gfm/unnamed-chunk-65-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-65-1.png)
 
 # Generate tabular summary of results
 
