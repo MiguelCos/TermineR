@@ -200,7 +200,7 @@ fragpipe_adapter <- function(parent_dir,
     # select the psm dataframe to keep only the selected columns
     scaled_ratios <- x$psm %>%
     mutate(across(all_of(sample_cols),
-                  ~log2(. + 12) - log2(.data[[ref_sample]] + 12),
+                  ~log2(. + 1) - log2(.data[[ref_sample]] + 1),
                   .names = "ratio_{.col}"))
     } else {
 
@@ -211,7 +211,7 @@ fragpipe_adapter <- function(parent_dir,
                     ~case_when(. == 0 ~ NA,
                                TRUE ~ .))) %>%
     mutate(across(all_of(sample_cols),
-                  ~log2(. + 12),
+                  ~log2(. + 1),
                   .names = "ratio_{.col}"))
 
     }
@@ -358,7 +358,13 @@ fragpipe_adapter <- function(parent_dir,
       by = c(grouping_var, "mixture")
     ) %>%
     # calculate the final abundance values
-    mutate(ref_normalized_abundance = RNij + log2(REFi))
+    mutate(ref_normalized_abundance = RNij + log2(REFi + 1)) %>%
+     # substitute -Inf or Inf values with NA for RNij
+    mutate(RNij = case_when(
+      RNij == -Inf ~ NA,
+      RNij == Inf ~ NA,
+      TRUE ~ RNij
+    ))
 
     } else {
 

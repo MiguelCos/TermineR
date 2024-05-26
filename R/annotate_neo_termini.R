@@ -282,6 +282,14 @@ if(organism == "mouse"){
 
   rm(mendicato_trucantula_uniprot_processing)
 
+  } else if(organism == "rhizobium_melitoli"){
+
+  data("rhizobium_melitoli_uniprot_processing", package = "TermineR")
+
+  uniprot_processing <- rhizobium_melitoli_uniprot_processing
+
+  rm(rhizobium_melitoli_uniprot_processing)
+
   } 
 
 df_mol_proc_feat <- uniprot_processing %>%
