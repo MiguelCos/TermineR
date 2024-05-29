@@ -263,16 +263,12 @@ if(organism == "mouse"){
   data("mouse_uniprot_processing", package = "TermineR")
 
   uniprot_processing <- mouse_uniprot_processing
-  
-  rm(mouse_uniprot_processing)
 
   } else if (organism == "human"){
   
   data("human_uniprot_processing", package = "TermineR")
 
   uniprot_processing <- human_uniprot_processing
-
-  rm(human_uniprot_processing)
   
   } else if(organism == "mendicato_trucantula"){
 
@@ -280,15 +276,11 @@ if(organism == "mouse"){
 
   uniprot_processing <- mendicato_trucantula_uniprot_processing
 
-  rm(mendicato_trucantula_uniprot_processing)
-
   } else if(organism == "rhizobium_melitoli"){
 
   data("rhizobium_melitoli_uniprot_processing", package = "TermineR")
 
   uniprot_processing <- rhizobium_melitoli_uniprot_processing
-
-  rm(rhizobium_melitoli_uniprot_processing)
 
   } 
 
