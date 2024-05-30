@@ -847,7 +847,7 @@ diann_adapter <- function(
 fragpipe_lf_adapter <- function(
   parent_dir,
   annotation_file_path,
-  grouping_var) {
+  grouping_var = "nterm_modif_peptide") {
 
   interest_cols <- c("Spectrum File",
                      "Peptide",
@@ -859,7 +859,41 @@ fragpipe_lf_adapter <- function(
                      "Protein ID",
                      "Gene")
 
-psm_tsv <- read_tsv(paste0(parent_dir,"/psm.tsv"))
+# Construct the path to the psm.tsv files
+
+if(!any(str_detect(list.files(parent_dir), "psm.tsv"))){
+
+  # get the folder names of main project diretory
+  folders_dir <- list.dirs(parent_dir,
+                           full.names = TRUE,
+                           recursive = FALSE)
+  intern_foldrs <- list.dirs(parent_dir,
+                             full.names = FALSE,
+                             recursive = FALSE)
+  psm_file_path <- paste0(folders_dir, "/psm.tsv")
+
+} else {
+
+  intern_foldrs <- "exp_1"
+
+  folders_dir <- parent_dir
+
+  psm_file_path <- paste0(parent_dir, "/psm.tsv")
+
+}
+
+# get a list of psm.tsv files
+message("Loading psm.tsv files...")
+list_psms <- purrr::map(.x = psm_file_path,
+                        .f = read_tsv,
+                        .progress = TRUE) %>%
+                        suppressMessages()
+
+# define names of list of psm files
+names(list_psms) <- intern_foldrs
+
+# combine all psm files into one
+psm_tsv <- bind_rows(list_psms, .id = "experiment")
 
 annotation_txt <- read_tsv(annotation_file_path) %>%
   na.omit()
@@ -872,7 +906,7 @@ psm_tsv_sel <- psm_tsv %>%
     dplyr::select(-`Spectrum File`) %>%
     left_join(annotation_txt) %>%
     mutate(
-      nterminal_modification = case_when(
+      nterm_modif = case_when(
         str_detect(`Assigned Modifications`, "N-term\\(304.207[0-9]\\)") ~ "TMT",
         str_detect(`Assigned Modifications`, "N-term\\(229.162[0-9]\\)") ~ "TMT",
         str_detect(`Assigned Modifications`, "N-term\\(42.010[0-9]\\)") ~ "Acetyl",
@@ -884,7 +918,7 @@ psm_tsv_sel <- psm_tsv %>%
     ) %>%
     mutate(
       nterm_modif_peptide = paste(
-        nterminal_modification,
+        nterm_modif,
         Peptide,
         sep = "_"
       )
@@ -892,11 +926,11 @@ psm_tsv_sel <- psm_tsv %>%
     dplyr::rename(
       peptide = Peptide,
       protein = `Protein ID`,
-      intensity = Intensity,
-      sample = sample_name
+      intensity = Intensity
     ) %>%
     dplyr::select(
       nterm_modif_peptide,
+      nterm_modif,
       intensity,
       peptide,
       protein,
@@ -926,6 +960,7 @@ psm_tsv_sel <- psm_tsv %>%
   pept2prot2modif <- psm_tsv_sel %>%
     dplyr::select(
       nterm_modif_peptide,
+      nterm_modif,
       peptide,
       protein) %>%
     distinct()
@@ -939,10 +974,11 @@ psm_tsv_sel <- psm_tsv %>%
       names_from = "sample",
       values_from = "RNij"
     ) %>%
-    left_join(pept2prot2modif, by = "nterm_modif_peptide") %>%
+    left_join(pept2prot2modif, by = grouping_var) %>%
     dplyr::relocate(
       nterm_modif_peptide,
       peptide,
+      nterm_modif,
       protein
     )
 
