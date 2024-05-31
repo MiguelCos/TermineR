@@ -247,10 +247,10 @@ Where:
     names of the search files in the `psm.tsv` output files.
   - `sample`: sample name. Can be user-define. Usually defines the
     experimental condition and the biological replicate number.
-  - An example of this file can be found in this repo [here]().
+  - An example of this file can be found in this repo [here](https://github.com/MiguelCos/TermineR/blob/main/data-raw/proca_shotgun_label_free_semi_tryptic/annotation.txt).
 
 We have included a minimal example on the usage of the
-`fragpipe_lf_adapter` function in the [label-free example workflow]().
+`fragpipe_lf_adapter` function in the [label-free example workflow](https://github.com/MiguelCos/TermineR/blob/main/terminomics_analysis_workflow_label_free.md).
 
 ## Peptide annotation
 
