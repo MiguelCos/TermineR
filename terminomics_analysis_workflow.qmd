@@ -1,20 +1,18 @@
 ---
 title: "Terminomics analysis of proteolytic processing in polycystic kidney disease in mice"
-author: "Miguel Cosenza-Contreras and Adrianna Seredynska"
 format:
   gfm:
-    toc-depth: 1 # default is 3
-    toc-location: left # default is right, option is 'body'
-    number-sections: true
-    number-depth: 1
+    toc: true
+    toc-depth: 2
+    number-sections: false
 editor: source
+execute:
+  eval: true
+  echo: true
+  error: false
+  warning: false
+  message: false
 ---
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-knitr::opts_chunk$set(echo = TRUE, 
-                      message = FALSE, 
-                      warning = FALSE)
-```
 
 # Background and general description of the data analysis approach
 

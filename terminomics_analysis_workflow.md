@@ -1,6 +1,71 @@
-# Terminomics analysis of proteolytic processing in polycystic kidney
-disease in mice
-Miguel Cosenza-Contreras and Adrianna Seredynska
+# Terminomics analysis of proteolytic processing in polycystic kidney disease in mice
+
+
+- [Background and general description of the data analysis
+  approach](#background-and-general-description-of-the-data-analysis-approach)
+- [General experimental information](#general-experimental-information)
+- [Short description of database search and quantitation
+  approach](#short-description-of-database-search-and-quantitation-approach)
+- [Required R packages](#required-r-packages)
+- [Load required data](#load-required-data)
+  - [Load the peptide-level quantitation data
+    (`fragpipe_adapter`)](#load-the-peptide-level-quantitation-data-fragpipe_adapter)
+  - [Load sample annotation data](#load-sample-annotation-data)
+  - [Load and prepare protein annotation
+    data](#load-and-prepare-protein-annotation-data)
+- [Annotation of peptide
+  specificities](#annotation-of-peptide-specificities)
+- [Visualization of peptide counts by N-terminal modification and
+  specificity](#visualization-of-peptide-counts-by-n-terminal-modification-and-specificity)
+- [Annotation of protein termini by Uniprot-annotated processing
+  information](#annotation-of-protein-termini-by-uniprot-annotated-processing-information)
+- [Quantitative analysis of
+  Neo-termini](#quantitative-analysis-of-neo-termini)
+  - [Set up the `SummarizedExperiment`
+    objects](#set-up-the-summarizedexperiment-objects)
+  - [% of total summed abundance of neo-termini by the total summed
+    abundance of all peptides (raw
+    intensities)](#-of-total-summed-abundance-of-neo-termini-by-the-total-summed-abundance-of-all-peptides-raw-intensities)
+- [Differential abundance analysis of neo-termini (without protein-level
+  normalization)](#differential-abundance-analysis-of-neo-termini-without-protein-level-normalization)
+  - [Prepare the abundance matrix](#prepare-the-abundance-matrix)
+  - [Set up the design matrix](#set-up-the-design-matrix)
+  - [Run *limma* differential abundance
+    analysis](#run-limma-differential-abundance-analysis)
+  - [Generate `topTable` with comparison
+    results](#generate-toptable-with-comparison-results)
+  - [Feature-specific FDR correction](#feature-specific-fdr-correction)
+- [Differential abundance analysis of neo-termini (after protein-level
+  normalization)](#differential-abundance-analysis-of-neo-termini-after-protein-level-normalization)
+  - [Prep summarizedExperiment object from protein-normalized
+    abundances](#prep-summarizedexperiment-object-from-protein-normalized-abundances)
+  - [Prep abundance matrix](#prep-abundance-matrix)
+  - [Set up design matrix](#set-up-design-matrix)
+  - [Run *limma* differential abundance
+    analysis](#run-limma-differential-abundance-analysis-1)
+  - [Generate `topTable` with comparison
+    results](#generate-toptable-with-comparison-results-1)
+  - [Feature-specific FDR
+    correction](#feature-specific-fdr-correction-1)
+- [Visualization of differential abundance
+  results](#visualization-of-differential-abundance-results)
+- [Analysis of proteolytic patterns from differential
+  proteolysis](#analysis-of-proteolytic-patterns-from-differential-proteolysis)
+- [Comparative analysis of neo-termini vs protein
+  abundance](#comparative-analysis-of-neo-termini-vs-protein-abundance)
+  - [Scatter plot of log2-fold changes of neo-termini vs protein
+    abundance](#scatter-plot-of-log2-fold-changes-of-neo-termini-vs-protein-abundance)
+  - [Scatter plot labelled with specific proteolytic
+    products](#scatter-plot-labelled-with-specific-proteolytic-products)
+- [Differential abundance analysis of protein
+  abundance](#differential-abundance-analysis-of-protein-abundance)
+  - [Prepare the abundance matrix and the summarizedExperiment
+    object](#prepare-the-abundance-matrix-and-the-summarizedexperiment-object)
+  - [Prepare design matrix](#prepare-design-matrix)
+  - [Run *limma* differential abundance
+    analysis](#run-limma-differential-abundance-analysis-2)
+- [Generate tabular summary of
+  results](#generate-tabular-summary-of-results)
 
 # Background and general description of the data analysis approach
 
@@ -293,7 +358,7 @@ semi_counts_barplot <- ggplot(annot_counts,
 print(semi_counts_barplot)
 ```
 
-![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-11-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-10-1.png)
 
 # Annotation of protein termini by Uniprot-annotated processing information
 
@@ -357,7 +422,7 @@ count_matches_plot <- ggplot(count_matches,
 print(count_matches_plot)
 ```
 
-![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-13-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-12-1.png)
 
 # Quantitative analysis of Neo-termini
 
@@ -552,7 +617,7 @@ boxplots_percentages <- ggplot(pept_summ_rawpur_semi_3,
 print(boxplots_percentages)
 ```
 
-![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-23-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-22-1.png)
 
 The plot shows that in general, the percentage of proteolytic products
 is similar between the two conditions.
@@ -722,18 +787,14 @@ the proteins they belong to. This is done using the
 This function perform the next processing steps:
 
 - 1.  Get a peptide abundance matrix (raw abundances).
-
 - 2.  Summarize the abundances to protein abundances based on unique
       fully-specific peptides (this is optional but it’s set as such by
       default). This means: we assume that the abundance of a protein is
       represented by the abundance of its unique fully-specific
       peptides.
-
 - 3.  Calculate the peptide to protein ratio.
-
 - 4.  Calculate the fraction of abundance of each peptide which is
       representative of the whole protein abundance.
-
 - 5.  Log2-transform this abundance values and normalize by median
       centering.
 
@@ -1060,7 +1121,7 @@ cowplot::plot_grid(
   nrow = 1)
 ```
 
-![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-47-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-46-1.png)
 
 We can observe that 1169 proteolytic products as differentially abundant
 after normalization by protein abundance, while we have 1341 before
@@ -1121,7 +1182,7 @@ pheatmap(upregulated_cleavage_area_counts$amino_acid_count,
         color = colorRampPalette(brewer.pal(n = 9, name = "Reds"))(100))
 ```
 
-![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-51-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-50-1.png)
 
 We see that several of our up-regulated proteolytic products contain C
 or S at the P1 position.
@@ -1260,10 +1321,10 @@ cor_test_res_1
     t = 3.185, df = 1167, p-value = 0.001486
     alternative hypothesis: true correlation is not equal to 0
     95 percent confidence interval:
-     0.03568735 0.14937299
+     0.03568569 0.14937136
     sample estimates:
            cor 
-    0.09283272 
+    0.09283107 
 
 Then we generate the scatter plot.
 
@@ -1297,7 +1358,7 @@ ggplot(log2FCpept_vs_log2FCprots_1,
   ggtitle(label = "Diff. abund. neo-termini vs protein abundance")
 ```
 
-![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-57-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-56-1.png)
 
 ## Scatter plot labelled with specific proteolytic products
 
@@ -1371,7 +1432,7 @@ ggplot(log2FCpept_vs_log2FCprots_1,
   ggtitle(label = "Diff. abund. neo-termini vs protein abundance")
 ```
 
-![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-60-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-59-1.png)
 
 # Differential abundance analysis of protein abundance
 
@@ -1506,7 +1567,7 @@ ggplot(KO_vs_WT_protein_limma,
     )
 ```
 
-![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-65-1.png)
+![](terminomics_analysis_workflow_files/figure-commonmark/unnamed-chunk-64-1.png)
 
 # Generate tabular summary of results
 
@@ -1598,3 +1659,88 @@ write_tsv(
   file = here("data-raw/pkd_mouse_model_search/output/limma_merged_prot_norm_terminomics_and_proteomics.tsv")
 )
 ```
+
+``` r
+sessionInfo()
+```
+
+    R version 4.4.0 (2024-04-24 ucrt)
+    Platform: x86_64-w64-mingw32/x64
+    Running under: Windows 11 x64 (build 22631)
+
+    Matrix products: default
+
+
+    locale:
+    [1] LC_COLLATE=English_United States.utf8 
+    [2] LC_CTYPE=English_United States.utf8   
+    [3] LC_MONETARY=English_United States.utf8
+    [4] LC_NUMERIC=C                          
+    [5] LC_TIME=English_United States.utf8    
+
+    time zone: Europe/Berlin
+    tzcode source: internal
+
+    attached base packages:
+    [1] stats4    stats     graphics  grDevices utils     datasets  methods  
+    [8] base     
+
+    other attached packages:
+     [1] magrittr_2.0.3              RColorBrewer_1.1-3         
+     [3] pheatmap_1.0.12             SummarizedExperiment_1.30.2
+     [5] GenomicRanges_1.52.1        GenomeInfoDb_1.36.4        
+     [7] MatrixGenerics_1.12.3       matrixStats_1.3.0          
+     [9] ggrepel_0.9.4               ggsignif_0.6.4             
+    [11] ggpubr_0.6.0                seqinr_4.2-30              
+    [13] janitor_2.2.0               here_1.0.1                 
+    [15] org.Mm.eg.db_3.17.0         AnnotationDbi_1.62.2       
+    [17] IRanges_2.34.1              S4Vectors_0.38.2           
+    [19] Biobase_2.60.0              BiocGenerics_0.46.0        
+    [21] clusterProfiler_4.8.3       limma_3.56.2               
+    [23] lubridate_1.9.2             forcats_1.0.0              
+    [25] stringr_1.5.1               dplyr_1.1.2                
+    [27] purrr_1.0.1                 readr_2.1.4                
+    [29] tidyr_1.3.0                 tibble_3.2.1               
+    [31] ggplot2_3.5.1               tidyverse_2.0.0            
+    [33] TermineR_1.0.0             
+
+    loaded via a namespace (and not attached):
+      [1] rstudioapi_0.15.0       jsonlite_1.8.5          farver_2.1.1           
+      [4] rmarkdown_2.25          fs_1.6.2                zlibbioc_1.46.0        
+      [7] vctrs_0.6.3             memoise_2.0.1           RCurl_1.98-1.13        
+     [10] ggtree_3.8.2            rstatix_0.7.2           S4Arrays_1.0.6         
+     [13] htmltools_0.5.7         broom_1.0.5             gridGraphics_0.5-1     
+     [16] plyr_1.8.9              cachem_1.0.8            igraph_2.0.3           
+     [19] lifecycle_1.0.4         pkgconfig_2.0.3         Matrix_1.6-3           
+     [22] R6_2.5.1                fastmap_1.1.1           gson_0.1.0             
+     [25] GenomeInfoDbData_1.2.10 snakecase_0.11.1        digest_0.6.33          
+     [28] aplot_0.2.2             enrichplot_1.20.3       colorspace_2.1-0       
+     [31] patchwork_1.1.3         rprojroot_2.0.4         RSQLite_2.3.3          
+     [34] labeling_0.4.3          diann_1.0.1             fansi_1.0.6            
+     [37] timechange_0.2.0        mgcv_1.9-0              abind_1.4-5            
+     [40] httr_1.4.7              polyclip_1.10-6         compiler_4.4.0         
+     [43] bit64_4.0.5             withr_3.0.0             downloader_0.4         
+     [46] backports_1.4.1         BiocParallel_1.34.2     carData_3.0-5          
+     [49] viridis_0.6.4           DBI_1.1.3               ggforce_0.4.1          
+     [52] MASS_7.3-60             DelayedArray_0.26.7     HDO.db_0.99.1          
+     [55] tools_4.4.0             ape_5.7-1               scatterpie_0.2.1       
+     [58] glue_1.6.2              nlme_3.1-163            GOSemSim_2.26.1        
+     [61] grid_4.4.0              shadowtext_0.1.2        reshape2_1.4.4         
+     [64] ade4_1.7-22             fgsea_1.26.0            generics_0.1.3         
+     [67] gtable_0.3.5            tzdb_0.4.0              data.table_1.15.4      
+     [70] hms_1.1.3               car_3.1-2               tidygraph_1.2.3        
+     [73] utf8_1.2.4              XVector_0.40.0          pillar_1.9.0           
+     [76] vroom_1.6.4             yulab.utils_0.1.0       splines_4.4.0          
+     [79] tweenr_2.0.2            treeio_1.24.3           lattice_0.22-5         
+     [82] bit_4.0.5               tidyselect_1.2.0        GO.db_3.17.0           
+     [85] Biostrings_2.68.1       knitr_1.45              gridExtra_2.3          
+     [88] xfun_0.41               graphlayouts_1.0.2      stringi_1.7.12         
+     [91] lazyeval_0.2.2          ggfun_0.1.3             yaml_2.3.7             
+     [94] evaluate_0.23           codetools_0.2-19        RcppEigen_0.3.3.9.4    
+     [97] ggraph_2.1.0            qvalue_2.36.0           ggplotify_0.1.2        
+    [100] cli_3.6.1               munsell_0.5.1           Rcpp_1.0.11            
+    [103] png_0.1-8               parallel_4.4.0          blob_1.2.4             
+    [106] DOSE_3.26.2             bitops_1.0-7            viridisLite_0.4.2      
+    [109] tidytree_0.4.5          scales_1.3.0            crayon_1.5.2           
+    [112] rlang_1.1.1             cowplot_1.1.1           fastmatch_1.1-4        
+    [115] KEGGREST_1.40.1        

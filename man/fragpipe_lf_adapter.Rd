@@ -13,7 +13,11 @@ A data frame with at least 4 columns
 }
 }
 \usage{
-fragpipe_lf_adapter(parent_dir, annotation_file_path, grouping_var)
+fragpipe_lf_adapter(
+  parent_dir,
+  annotation_file_path,
+  grouping_var = "nterm_modif_peptide"
+)
 }
 \arguments{
 \item{parent_dir}{directory of FragPipe search results}
