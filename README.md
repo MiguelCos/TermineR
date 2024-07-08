@@ -288,7 +288,7 @@ Where:
     - Lysarginase would require `sense = "N"` and `specificity = "K|R"`.
 - `organism` is the organism used in the search. By default, the value
   is set to `"mouse"`. Currently `"human"`, `"mouse"`,
-  `"mendicato_trucantula"` and `"rhizobium_melitoli"` are supported.
+  `"mendicato_trucantula"`, `"rhizobium_melitoli"` and `"pig"` are supported.
   Other organisms available in Uniprot can be included upon request.
 
 ## Visualization of cleavage sites

@@ -282,6 +282,12 @@ if(organism == "mouse"){
 
   uniprot_processing <- rhizobium_melitoli_uniprot_processing
 
+  } else if(organism == "pig"){
+
+  data("pig_uniprot_processing", package = "TermineR")
+
+  uniprot_processing <- pig_uniprot_processing
+
   } 
 
 df_mol_proc_feat <- uniprot_processing %>%
