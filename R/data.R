@@ -111,3 +111,16 @@
 #' }
 #' @source Uniprot API (queried on July 2024)
 "pig_uniprot_processing"
+
+#' @title UniMOd ID to modification name mapping 
+#'
+#' @description Tabular annotation of the numerical ID from UniMod and their associated modifications
+#'   
+#' @format A data frame
+#' \describe{
+#'  \item{id}{UniMod ID}
+#'  \item{id_nr}{Numerical UniMod ID}
+#'  \item{name}{Descriptive name of the modification}
+#' }
+#' @source Uniprot API (queried on August 2024)
+"unimod_id_to_name_mapping"
