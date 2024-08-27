@@ -719,18 +719,23 @@ diann_adapter <- function(
     left_join(.,
               unimod_id_to_name_mapping) %>%
     mutate(
+      nterm_modif = case_when(
+        is.na(name) ~ "n",
+        TRUE ~ name
+      )
+    ) %>%
+    mutate(
       nterm_modif_peptide = paste(
-        name,
+        nterm_modif,
         Stripped.Sequence,
         sep = "_"),
-      nterm_modif = name
     ) %>%
     relocate(
       nterm_modif_peptide,
       nterm_modif,
       .before = Modified.Sequence
     )
-
+  
   peptide2protein <- diann_df_min %>%
     dplyr::select(
       protein = Protein.Ids,
