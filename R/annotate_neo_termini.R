@@ -301,7 +301,7 @@ if(organism == "mouse"){
     
   data("human_and_isoforms_uniprot_processing", package = "TermineR")
     
-  uniprot_processing <- human_iso_uniprot
+  uniprot_processing <- human_and_isoforms_uniprot_processing
   
   } else if(organism %in% expected_organisms == FALSE){
     
