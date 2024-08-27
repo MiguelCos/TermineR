@@ -699,13 +699,44 @@ diann_adapter <- function(
   require(dplyr)
   require(tidyr)
   require(stringr)
+  
+  data("unimod_id_to_name_mapping", package = "TermineR")
 
-  diann_df_min <- diann_load(path_to_file)
+  diann_df_min <- diann_load(path_to_file) %>%
+    # extract modifications from modified_sequence check for everything inside '()'
+    mutate(
+      first_modif = str_extract(Modified.Sequence, "\\((.*?)\\)") %>% 
+                                map_chr(~paste(.x, collapse = ";"))
+    ) %>%
+    # substitute the modification, including the brackets, with a Z
+    mutate(
+      min_first_mod_seq = str_replace(Modified.Sequence, "\\((.*?)\\)", "Z")
+    ) %>%
+    # get the location of those modifications
+    mutate(
+      # get the start of the first modification only using str_locate
+      id_nr = str_locate(min_first_mod_seq, "Z")[, "start"]) %>%
+    left_join(.,
+              unimod_id_to_name_mapping) %>%
+    mutate(
+      nterm_modif_peptide = paste(
+        name,
+        Stripped.Sequence,
+        sep = "_"),
+      nterm_modif = name
+    ) %>%
+    relocate(
+      nterm_modif_peptide,
+      nterm_modif,
+      .before = Modified.Sequence
+    )
 
   peptide2protein <- diann_df_min %>%
     dplyr::select(
       protein = Protein.Ids,
-      peptide = Stripped.Sequence
+      peptide = Stripped.Sequence,
+      nterm_modif_peptide,
+      nterm_modif,
     ) %>%
     mutate(
       protein = str_remove(
@@ -714,15 +745,16 @@ diann_adapter <- function(
     ) %>%
     dplyr::select(
       protein,
-      peptide
+      peptide,
+      nterm_modif_peptide
     ) %>%
     distinct()
 
   diann_df_mat_min <- diann_matrix(
     diann_df_min,
-    id.header = "Stripped.Sequence",
+    id.header = "nterm_modif_peptide",
     quantity.header = "Precursor.Normalised",
-    proteotypic.only = proteotypic,
+    proteotypic.only = TRUE,
     q = 0.01)
 
   colnames(diann_df_mat_min) <- str_remove(
@@ -733,8 +765,8 @@ diann_adapter <- function(
 
   diann_df_mat_min <- diann_df_mat_min %>%
     as.data.frame() %>%
-    rownames_to_column("peptide") %>%
-    arrange(peptide) %>%
+    rownames_to_column("nterm_modif_peptide") %>%
+    arrange(nterm_modif_peptide) %>%
     # apply log2 transformation
     mutate(
       across(
@@ -742,6 +774,7 @@ diann_adapter <- function(
         ~log2(.x)
       )
     )
+      
 
   # apply MAD scaling
   scaled_diann_df_mat_min <- diann_df_mat_min %>%
@@ -749,9 +782,9 @@ diann_adapter <- function(
     pivot_longer(cols = where(is.double),
                  names_to = "sample",
                  values_to = "log2_ratio_2_ref") %>%
-
+    
     # calculate median ratios per desired level, per sample
-    group_by(peptide, sample) %>%
+    group_by(nterm_modif_peptide, sample) %>%
     summarize(log2_rat2ref_group = median(log2_ratio_2_ref,
                                           na.rm = TRUE),
               .groups = "drop") %>%
@@ -760,32 +793,32 @@ diann_adapter <- function(
     mutate(Mi = median(log2_rat2ref_group,
                        na.rm = TRUE)) %>%
     ungroup() %>%
-
+    
     # global median across all samples
     mutate(M0 = median(Mi,
                        na.rm = TRUE)) %>%
-
+    
     # median centered ratios based on median ratios per sample
     mutate(RCij = log2_rat2ref_group - Mi) %>%
-
+    
     # calculate median absolute deviation per sample
     group_by(sample) %>%
     mutate(MADi = median(abs(RCij),
                          na.rm = TRUE)) %>%
     ungroup() %>%
-
+    
     # calculate global median absolute deviation
     mutate(MAD0 = median(MADi,
                          na.rm = TRUE)) %>%
     ungroup() %>%
-
+    
     # calculate scaled ratios
     mutate(RNij = (RCij / MADi) * MAD0 + M0)
-
+  
   # turn back to wide format using RNij as abundance
   scaled_diann_df_mat_min <- scaled_diann_df_mat_min %>%
     dplyr::select(
-      peptide,
+      nterm_modif_peptide,
       sample,
       RNij
     ) %>%
@@ -793,17 +826,15 @@ diann_adapter <- function(
       names_from = "sample",
       values_from = "RNij"
     ) %>%
-    mutate(
-      nterm_modif = "n",
-      nterm_modif_peptide = paste(
-        "n",
-        peptide,
-        sep = "_"
-      )
+    separate(
+      col = nterm_modif_peptide,
+      into = c("nterm_modif",
+               "peptide"),
+      sep = "_",
+      remove = FALSE
     ) %>%
     left_join(
       peptide2protein,
-      by = "peptide",
       multiple = "first"
     ) %>%
     relocate(
