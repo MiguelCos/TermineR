@@ -299,7 +299,7 @@ if(organism == "mouse"){
 
   } else if(organism == "human_iso"){
     
-  data("human_iso_uniprot_processing", package = "TermineR")
+  data("human_and_isoforms_uniprot_processing", package = "TermineR")
     
   uniprot_processing <- human_iso_uniprot
   

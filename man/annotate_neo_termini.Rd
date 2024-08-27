@@ -56,7 +56,7 @@ annotate_neo_termini(
 
 \item{specificity}{amino acid specificity of the cleavage site. Example: "K|R" for trypsin.}
 
-\item{organism}{organism of the fasta file. Default is "mouse".}
+\item{organism}{organism of the fasta file. Default is "mouse". Other options are "human", "mendicato_trucantula", "rhizobium_melitoli", "pig", "human_iso".}
 
 \item{distinct}{logical. If TRUE, keep only one peptide sequence per feature. Default is TRUE.}
 }
