@@ -75,6 +75,8 @@ annotate_neo_termini <- function(
   require(purrr)
   require(tidyr)
   require(magrittr)
+  
+  data("unimod_id_to_name_mapping", package = "TermineR")
 
   peptide2protein <- peptides_df %>%
                     dplyr::select(peptide, protein, nterm_modif) %>%
@@ -96,6 +98,16 @@ annotate_neo_termini <- function(
         protein = fasta_names,
         protein_sequence = unlist(fasta_2)
     )
+  
+  expected_modifications <- c("TMT",
+                              "Dimethyl",
+                              "Acetyl",
+                              str_subset(unimod_annotation$name,
+                                         "Dimethyl"),
+                              str_subset(unimod_annotation$name,
+                                         "Acetyl"),
+                              str_subset(unimod_annotation$name,
+                                         "TMT"))
 
 prot2pept2fasta <- left_join(
     peptide2protein,
@@ -141,20 +153,20 @@ prot2pept2fasta <- left_join(
         #specificity == "semi_Cterm" & end_position + 5 >= str_length(protein_sequence) ~ str_sub(protein_sequence, end_position - 4, str_length(protein_sequence)),
         #specificity == "semi_Cterm" & end_position + 5 < str_length(protein_sequence) ~ str_sub(protein_sequence, end_position - 4, end_position),
         specificity == "semi_Cterm" ~ str_sub(protein_sequence, end_position - 4, end_position),
-        specificity == "specific" & nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position - 5 <= 1 ~ str_sub(protein_sequence, 1, start_position - 1),
-        specificity == "specific" & nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position - 5 > 1 ~ str_sub(protein_sequence, start_position - 5, start_position - 1),
-        specificity == "specific" & !nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position - 5 <= 1 ~ str_sub(protein_sequence, 1, start_position - 1),
-        specificity == "specific" & !nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position - 5 > 1 ~ str_sub(protein_sequence, start_position - 5, start_position - 1)
+        specificity == "specific" & nterm_modif %in% expected_modifications & start_position - 5 <= 1 ~ str_sub(protein_sequence, 1, start_position - 1),
+        specificity == "specific" & nterm_modif %in% expected_modifications & start_position - 5 > 1 ~ str_sub(protein_sequence, start_position - 5, start_position - 1),
+        specificity == "specific" & !nterm_modif %in% expected_modifications & start_position - 5 <= 1 ~ str_sub(protein_sequence, 1, start_position - 1),
+        specificity == "specific" & !nterm_modif %in% expected_modifications & start_position - 5 > 1 ~ str_sub(protein_sequence, start_position - 5, start_position - 1)
     ),
     five_res_after = case_when(
         specificity == "semi_Nterm" & start_position + 4 < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + 4),
         specificity == "semi_Nterm" & start_position + 4 >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence)),
         specificity == "semi_Cterm" & end_position + 4 < str_length(protein_sequence) ~ str_sub(protein_sequence, end_position + 1, end_position + 5),
         specificity == "semi_Cterm" & end_position + 4 >= str_length(protein_sequence) ~ str_sub(protein_sequence, end_position + 1, str_length(protein_sequence)),
-        specificity == "specific" & nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position + 4 < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + 4),
-        specificity == "specific" & nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position + 4 >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence)),
-        specificity == "specific" & !nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position + 4 < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + 4),
-        specificity == "specific" & !nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position + 4 >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence))
+        specificity == "specific" & nterm_modif %in% expected_modifications & start_position + 4 < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + 4),
+        specificity == "specific" & nterm_modif %in% expected_modifications & start_position + 4 >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence)),
+        specificity == "specific" & !nterm_modif %in% expected_modifications & start_position + 4 < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + 4),
+        specificity == "specific" & !nterm_modif %in% expected_modifications & start_position + 4 >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence))
     )
     ) %>%
   mutate(
