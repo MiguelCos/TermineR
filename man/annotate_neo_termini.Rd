@@ -30,7 +30,12 @@ A data frame with at least 28 columns
 \item{p1_position_percentage}{Position of the P1 residue in proportion of the protein length}
 \item{met_clipping}{Logical. TRUE if the peptide is a methionine clipping}
 \item{matches_p1_prime}{Logical. TRUE if the peptide matches the P1' position of a processing feature}
-\item{uniprot_processing_type}{Type of processing feature from Uniprot API}
+\item{uniprot_processing_type}{Type of processing feature from Uniprot API. One of "INIT_MET", "PROPEP",
+"SIGNAL", "TRANSIT", "CHAIN".
+"non_canonical" indicates that the potential cleavage location
+has not been annotated in UniProt processing features.
+"not_canonical_no_procc_annot" indicates that the potential cleavage site
+maps to a Uniprot protein ID that does not have processing features information.}
 \item{processing_annotation_start}{Start position of the processing feature in the protein sequence}
 \item{processing_annotation_end}{End position of the processing feature in the protein sequence}
 \item{protein_sequence}{Protein sequence}
@@ -43,7 +48,7 @@ annotate_neo_termini(
   fasta_location,
   sense,
   specificity,
-  organism = "mouse",
+  organism,
   distinct = TRUE
 )
 }

@@ -715,7 +715,8 @@ diann_adapter <- function(
     # get the location of those modifications
     mutate(
       # get the start of the first modification only using str_locate
-      id_nr = str_locate(min_first_mod_seq, "Z")[, "start"]) %>%
+      first_modif_locat = str_locate(min_first_mod_seq, "Z")[, "start"],
+      id_nr = parse_number(min_first_mod_seq)) %>%
     left_join(.,
               unimod_id_to_name_mapping) %>%
     mutate(

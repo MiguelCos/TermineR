@@ -34,7 +34,12 @@
 #'  \item{p1_position_percentage}{Position of the P1 residue in proportion of the protein length}
 #'  \item{met_clipping}{Logical. TRUE if the peptide is a methionine clipping}
 #'  \item{matches_p1_prime}{Logical. TRUE if the peptide matches the P1' position of a processing feature}
-#'  \item{uniprot_processing_type}{Type of processing feature from Uniprot API}
+#'  \item{uniprot_processing_type}{Type of processing feature from Uniprot API. One of "INIT_MET", "PROPEP", 
+#'                                 "SIGNAL", "TRANSIT", "CHAIN". 
+#'                                 "non_canonical" indicates that the potential cleavage location 
+#'                                 has not been annotated in UniProt processing features.
+#'                                 "not_canonical_no_procc_annot" indicates that the potential cleavage site
+#'                                 maps to a Uniprot protein ID that does not have processing features information.}
 #'  \item{processing_annotation_start}{Start position of the processing feature in the protein sequence}
 #'  \item{processing_annotation_end}{End position of the processing feature in the protein sequence}
 #'  \item{protein_sequence}{Protein sequence}
@@ -61,7 +66,7 @@ annotate_neo_termini <- function(
   fasta_location,
   sense,
   specificity,
-  organism = "mouse",
+  organism,
   distinct = TRUE){
 
   require(dplyr)
@@ -138,7 +143,8 @@ prot2pept2fasta <- left_join(
         specificity == "semi_Cterm" ~ str_sub(protein_sequence, end_position - 4, end_position),
         specificity == "specific" & nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position - 5 <= 1 ~ str_sub(protein_sequence, 1, start_position - 1),
         specificity == "specific" & nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position - 5 > 1 ~ str_sub(protein_sequence, start_position - 5, start_position - 1),
-        TRUE ~ "not_neo_termini"
+        specificity == "specific" & !nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position - 5 <= 1 ~ str_sub(protein_sequence, 1, start_position - 1),
+        specificity == "specific" & !nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position - 5 > 1 ~ str_sub(protein_sequence, start_position - 5, start_position - 1)
     ),
     five_res_after = case_when(
         specificity == "semi_Nterm" & start_position + 4 < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + 4),
@@ -147,7 +153,8 @@ prot2pept2fasta <- left_join(
         specificity == "semi_Cterm" & end_position + 4 >= str_length(protein_sequence) ~ str_sub(protein_sequence, end_position + 1, str_length(protein_sequence)),
         specificity == "specific" & nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position + 4 < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + 4),
         specificity == "specific" & nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position + 4 >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence)),
-        TRUE ~ "not_neo_termini"
+        specificity == "specific" & !nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position + 4 < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + 4),
+        specificity == "specific" & !nterm_modif %in% c("TMT", "Acetyl", "Dimethyl") & start_position + 4 >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence))
     )
     ) %>%
   mutate(
@@ -340,7 +347,7 @@ categ_canon_annot <- nter_pepts_n_feat %>%
       matches_p1_prime == TRUE & type == "PROPEP" ~ "PROPEP",
       matches_p1_prime == TRUE & type == "PEPTIDE" ~ "PEPTIDE",
       #matches_p1_prime == FALSE ~ "not_canonical",
-      #is.na(matches_p1_prime) ~ "not_canonical"
+      is.na(matches_p1_prime) ~ "not_canonical_no_procc_annot", 
       TRUE ~ "not_canonical"
     )
   ) %>%
@@ -368,7 +375,7 @@ categ_canon_annot <- nter_pepts_n_feat %>%
 # filter to keep one peptide sequence per feature
 pept_wmatch <- categ_canon_annot %>%
     dplyr::filter(
-      processing_type != "not_canonical"
+      !processing_type %in% c("not_canonical", "not_canonical_no_procc_annot")
     )
 
   if(distinct == TRUE){
@@ -401,6 +408,8 @@ categ2_pept_canannot <- bind_rows(pept_wmatch,
       processing_type = case_when(
         processing_type == "not_canonical" & p1_residue == "M" & peptide_start == 2 ~ "INIT_MET_not_canonical",
         processing_type == "not_canonical" & p1_prime_position == 1 ~ "Intact_ORF",
+        processing_type == "not_canonical_no_procc_annot" & p1_residue == "M" & peptide_start == 2 ~ "INIT_MET_not_canonical",
+        processing_type == "not_canonical_no_procc_annot" & p1_prime_position == 1 ~ "Intact_ORF",
         TRUE ~ processing_type
       ),
     ) %>%
