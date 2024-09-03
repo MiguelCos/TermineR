@@ -332,7 +332,7 @@ if(organism == "mouse"){
 
 df_mol_proc_feat <- uniprot_processing %>%
   dplyr::filter(
-    type %in% mol_processing_feat)#, # keep only interesting features
+    type %in% mol_processing_feat) %>% #, # keep only interesting features
                 #!is.na(length)) %>% # exclude features with missing values
   dplyr::rename(protein = accession)  # change column name
 
