@@ -271,11 +271,13 @@ protein_nter <- bind_rows(
   )
 
 # vector of interesting feature types as annotated by the uniprot API
-mol_processing_feat <- c("INIT_MET",
-                         "PROPEP",
-                         "SIGNAL",
-                         "TRANSIT",
-                         "CHAIN")
+mol_processing_feat <- c(
+  "INIT_MET",
+  "PROPEP",
+  "SIGNAL",
+  "TRANSIT",
+  "CHAIN"
+  )
 
 expected_organisms <- c(
   "mouse",
@@ -330,8 +332,8 @@ if(organism == "mouse"){
 
 df_mol_proc_feat <- uniprot_processing %>%
   dplyr::filter(
-    type %in% mol_processing_feat, # keep only interesting features
-                !is.na(length)) %>% # exclude features with missing values
+    type %in% mol_processing_feat)#, # keep only interesting features
+                #!is.na(length)) %>% # exclude features with missing values
   dplyr::rename(protein = accession)  # change column name
 
 nter_pepts_n_feat <- left_join(
@@ -349,7 +351,7 @@ categ_canon_annot <- nter_pepts_n_feat %>%
         TRUE ~ FALSE
         )
         ) %>%
-  dplyr::filter(!is.na(type)) %>% # eliminate proteins with no processing features annotated
+  #dplyr::filter(!is.na(type)) %>% # eliminate proteins with no processing features annotated
   mutate(
     processing_type = case_when(
       matches_p1_prime == TRUE & type == "CHAIN" ~ "CHAIN",
@@ -358,7 +360,7 @@ categ_canon_annot <- nter_pepts_n_feat %>%
       matches_p1_prime == TRUE & type == "TRANSIT" ~ "TRANSIT",
       matches_p1_prime == TRUE & type == "PROPEP" ~ "PROPEP",
       matches_p1_prime == TRUE & type == "PEPTIDE" ~ "PEPTIDE",
-      #matches_p1_prime == FALSE ~ "not_canonical",
+      matches_p1_prime == FALSE ~ "not_canonical",
       is.na(matches_p1_prime) ~ "not_canonical_no_procc_annot", 
       TRUE ~ "not_canonical"
     )
