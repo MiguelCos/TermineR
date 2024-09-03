@@ -437,10 +437,18 @@ categ2_pept_canannot <- bind_rows(pept_wmatch,
     )
 
 final_annotated_df <- left_join(
-    annotated_df_w_quant %>% dplyr::rename(peptide_start = start_position, peptide_end = end_position),
+    annotated_df_w_quant %>% dplyr::rename(
+      peptide_start = start_position, 
+      peptide_end = end_position),
     categ2_pept_canannot,
     relationship = "many-to-many"
     ) %>%
+  mutate(
+    uniprot_processing_type = case_when(
+      is.na(matches_p1_prime) ~ "not_canonical_no_procc_annot",
+      TRUE ~ uniprot_processing_type
+    )
+  )
   dplyr::relocate(
     nterm_modif_peptide,
     nterm_modif,
