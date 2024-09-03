@@ -448,7 +448,7 @@ final_annotated_df <- left_join(
       is.na(matches_p1_prime) ~ "not_canonical_no_procc_annot",
       TRUE ~ uniprot_processing_type
     )
-  )
+  ) %>%
   dplyr::relocate(
     nterm_modif_peptide,
     nterm_modif,
