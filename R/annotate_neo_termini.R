@@ -102,11 +102,11 @@ annotate_neo_termini <- function(
   expected_modifications <- c("TMT",
                               "Dimethyl",
                               "Acetyl",
-                              str_subset(unimod_annotation$name,
+                              str_subset(unimod_id_to_name_mapping$name,
                                          "Dimethyl"),
-                              str_subset(unimod_annotation$name,
+                              str_subset(unimod_id_to_name_mapping$name,
                                          "Acetyl"),
-                              str_subset(unimod_annotation$name,
+                              str_subset(unimod_id_to_name_mapping$name,
                                          "TMT"))
 
 prot2pept2fasta <- left_join(
