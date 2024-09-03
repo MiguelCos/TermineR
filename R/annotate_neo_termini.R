@@ -361,8 +361,8 @@ categ_canon_annot <- nter_pepts_n_feat %>%
       matches_p1_prime == TRUE & type == "PROPEP" ~ "PROPEP",
       matches_p1_prime == TRUE & type == "PEPTIDE" ~ "PEPTIDE",
       matches_p1_prime == FALSE ~ "not_canonical",
-      is.na(matches_p1_prime) ~ "not_canonical_no_procc_annot", 
-      TRUE ~ "not_canonical"
+      is.na(matches_p1_prime) ~ "not_canonical_no_procc_annot",
+      TRUE ~ "not_canonical_no_procc_annot"
     )
   ) %>%
   # select interesting columns
