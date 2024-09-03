@@ -722,7 +722,8 @@ diann_adapter <- function(
     mutate(
       nterm_modif = case_when(
         is.na(name) ~ "n",
-        TRUE ~ name
+        first_modif_locat == 1 & !is.na(name) ~ name,
+        first_modif_locat != 1 & !is.na(name) ~ "n"
       )
     ) %>%
     mutate(
