@@ -986,7 +986,7 @@ fragpipe_lf_adapter <- function(
   interest_cols <- c("Spectrum File",
                      "Peptide",
                      "Modified Peptide",
-                     "PeptideProphet Probability",
+                     "Probability",
                      "Intensity",
                      "Assigned Modifications",
                      "Is Unique",
