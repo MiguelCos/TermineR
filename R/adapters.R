@@ -104,7 +104,7 @@ fragpipe_adapter <- function(parent_dir,
 
     interest_cols <- c("Peptide",
                        "Modified Peptide",
-                       "PeptideProphet Probability",
+                       "Probability",
                        "Intensity",
                        "Assigned Modifications",
                        "Purity",
