@@ -13,12 +13,16 @@ A data frame with at least 4 columns
 }
 }
 \usage{
-diann_adapter(path_to_file, proteotypic = TRUE)
+diann_adapter(path_to_file, proteotypic = TRUE, summarization = "SUM")
 }
 \arguments{
 \item{path_to_file}{path to report file with DIANN search results in tsv format}
 
 \item{proteotypic}{keep only proteotypic peptides. Default is TRUE.}
+
+\item{summarization}{quantitative summarization approach for features identified by several precursors.
+"SUM" will sum up the intensities of the precursors. "MAX" will keep the intensity of the precursor with higher intensity.
+Default is "SUM".}
 }
 \description{
 Process report file from DIANN search results for further analysis with TermineR
