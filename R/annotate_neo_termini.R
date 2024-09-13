@@ -285,7 +285,9 @@ expected_organisms <- c(
   "mendicato_trucantula",
   "rhizobium_melitoli",
   "pig",
-  "human_iso"
+  "human_iso",
+  "arabidopsis",
+  "ecoli"
 )
 
 if(organism == "mouse"){
@@ -323,6 +325,18 @@ if(organism == "mouse"){
   data("human_and_isoforms_uniprot_processing", package = "TermineR")
     
   uniprot_processing <- human_and_isoforms_uniprot_processing
+  
+  } else if(organism == "arabidopsis"){
+    
+  data("arabidopsis_uniprot_processing", package = "TermineR")
+    
+  uniprot_processing <- arabidopsis_uniprot_processing
+  
+  } else if(organism == "ecoli"){
+    
+  data("ecoli_uniprot_processing", package = "TermineR")
+    
+  uniprot_processing <- ecoli_uniprot_processing
   
   } else if(organism %in% expected_organisms == FALSE){
     
