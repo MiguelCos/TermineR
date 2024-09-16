@@ -809,6 +809,12 @@ diann_adapter <- function(
       )
     ) %>%
     mutate(
+      nterm_modif = case_when(
+        str_detect(nterm_modif, "Dimethyl") ~ "Dimethyl",
+        TRUE ~ nterm_modif
+      )
+    ) %>% 
+    mutate(
       nterm_modif_peptide = paste(
         nterm_modif,
         Stripped.Sequence,
