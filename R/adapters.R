@@ -104,7 +104,7 @@ fragpipe_adapter <- function(parent_dir,
 
     interest_cols <- c("Peptide",
                        "Modified Peptide",
-                       "PeptideProphet Probability",
+                       "Probability",
                        "Intensity",
                        "Assigned Modifications",
                        "Purity",
@@ -992,7 +992,7 @@ fragpipe_lf_adapter <- function(
   interest_cols <- c("Spectrum File",
                      "Peptide",
                      "Modified Peptide",
-                     "PeptideProphet Probability",
+                     "Probability",
                      "Intensity",
                      "Assigned Modifications",
                      "Is Unique",
@@ -1043,6 +1043,7 @@ psm_tsv_sel <- psm_tsv %>%
     mutate(run = basename(`Spectrum File`)) %>%
     mutate(run = str_remove(run, ".pep.xml")) %>%
     mutate(run = str_remove(run, "interact-")) %>%
+    mutate(run = str_remove(run, ".mod")) %>%
     dplyr::select(-`Spectrum File`) %>%
     left_join(annotation_txt) %>%
     mutate(

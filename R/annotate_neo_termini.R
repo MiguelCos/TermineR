@@ -198,14 +198,16 @@ prot2pept2fasta <- left_join(
   ) %>%
   mutate(
     p1_residue = case_when(
+      p1_position == 0 ~ "N-term",
       specificity != "specific" ~ str_sub(five_res_before, 5, 5),
-      specificity == "specific" & sense == "C" ~ aa_before,
-      specificity == "specific" & sense == "N" ~ last_aa,
+      specificity == "specific" & sense == "C" & !is.na(aa_before) ~ aa_before,
+      specificity == "specific" & sense == "N" & !is.na(last_aa) ~ last_aa,
       TRUE ~ NA),
     p1_prime_residue = case_when(
+      p1_prime_position == protein_length ~ "C-term",
       specificity != "specific" ~ str_sub(five_res_after, 1, 1),
-      specificity == "specific" & sense == "C" ~ first_aa,
-      specificity == "specific" & sense == "N" ~ aa_after,
+      specificity == "specific" & sense == "C" & !is.na(first_aa) ~ first_aa,
+      specificity == "specific" & sense == "N" & !is.na(aa_after) ~ aa_after,
       TRUE ~ NA),
     p1_position_percentage = p1_position / str_length(protein_sequence) * 100,
     met_clipping = case_when(
@@ -285,7 +287,9 @@ expected_organisms <- c(
   "mendicato_trucantula",
   "rhizobium_melitoli",
   "pig",
-  "human_iso"
+  "human_iso",
+  "arabidopsis",
+  "ecoli"
 )
 
 if(organism == "mouse"){
@@ -323,6 +327,18 @@ if(organism == "mouse"){
   data("human_and_isoforms_uniprot_processing", package = "TermineR")
     
   uniprot_processing <- human_and_isoforms_uniprot_processing
+  
+  } else if(organism == "arabidopsis"){
+    
+  data("arabidopsis_uniprot_processing", package = "TermineR")
+    
+  uniprot_processing <- arabidopsis_uniprot_processing
+  
+  } else if(organism == "ecoli"){
+    
+  data("ecoli_uniprot_processing", package = "TermineR")
+    
+  uniprot_processing <- ecoli_uniprot_processing
   
   } else if(organism %in% expected_organisms == FALSE){
     
