@@ -853,7 +853,7 @@ diann_adapter <- function(
       diann_df_min,
       id.header = "nterm_modif_peptide",
       quantity.header = "Precursor.Normalised",
-      proteotypic.only = TRUE,
+      proteotypic.only = proteotypic,
       q = 0.01)
   
   } else if(summarization == "MAX"){
@@ -862,7 +862,7 @@ diann_adapter <- function(
       diann_df_min,
       id.header = "nterm_modif_peptide",
       quantity.header = "Precursor.Normalised",
-      proteotypic.only = TRUE,
+      proteotypic.only = proteotypic,
       q = 0.01)
   
   }
