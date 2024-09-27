@@ -124,3 +124,41 @@
 #' }
 #' @source Uniprot API (queried on August 2024)
 "unimod_id_to_name_mapping"
+
+#' @title Arabidopsis thaliana protein processing annotation from Uniprot API
+#'
+#' @description Tabular annotation of processing information as obtained from Uniprot API
+#'   
+#' @format A data frame
+#' \describe{
+#'  \item{type}{Type of processing feature. One of SIGNAL, CHAIN, INIT_MET, TRANSIT, PEPTIDE}
+#'  \item{description}{Description of processing feature}
+#'  \item{begin}{begin of the processing feature in protein sequence}
+#'  \item{end}{end of the processing feature in protein sequence}
+#'  \item{length}{length of the processing feature within protein sequence}
+#'  \item{accession}{Uniprot accession ID associated with the feature}
+#'  \item{entryName}{Uniprot Entry name ID associated with the feature}
+#'  \item{taxid}{Organism tax id}
+#'  \item{order}{order}
+#' }
+#' @source Uniprot API (queried on September 2024)
+"arabidopsis_uniprot_processing"
+
+#' @title Escherichia coli protein processing annotation from Uniprot API
+#'
+#' @description Tabular annotation of processing information as obtained from Uniprot API
+#'   
+#' @format A data frame
+#' \describe{
+#'  \item{type}{Type of processing feature. One of SIGNAL, CHAIN, INIT_MET, TRANSIT, PEPTIDE}
+#'  \item{description}{Description of processing feature}
+#'  \item{begin}{begin of the processing feature in protein sequence}
+#'  \item{end}{end of the processing feature in protein sequence}
+#'  \item{length}{length of the processing feature within protein sequence}
+#'  \item{accession}{Uniprot accession ID associated with the feature}
+#'  \item{entryName}{Uniprot Entry name ID associated with the feature}
+#'  \item{taxid}{Organism tax id}
+#'  \item{order}{order}
+#' }
+#' @source Uniprot API (queried on September 2024)
+"ecoli_uniprot_processing"
