@@ -5,7 +5,7 @@
 #' @param fasta_location location of the fasta file containing the protein sequences identified in the sample, in uniprot format.
 #' @param sense direction of the peptide cleavage. One of "N" or "C".
 #' @param specificity amino acid specificity of the cleavage site. Example: "K|R" for trypsin.
-#' @param organism organism of the fasta file. Default is "mouse". Other options are "human", "mendicato_trucantula", "rhizobium_melitoli", "pig", "human_iso".
+#' @param organism organism of the fasta file. Default is "mouse". Other options are "human", "medicago_trucantula", "rhizobium_melitoli", "pig", "human_iso", "ecoli" and "arabidopsis".
 #' @param distinct logical. If TRUE, keep only one peptide sequence per feature. Default is TRUE.
 #'
 #' @format A data frame with at least 28 columns
@@ -284,7 +284,7 @@ mol_processing_feat <- c(
 expected_organisms <- c(
   "mouse",
   "human",
-  "mendicato_trucantula",
+  "medicago_trucantula",
   "rhizobium_melitoli",
   "pig",
   "human_iso",
@@ -304,7 +304,7 @@ if(organism == "mouse"){
 
   uniprot_processing <- human_uniprot_processing
   
-  } else if(organism == "mendicato_trucantula"){
+  } else if(organism == "medicago_trucantula"){
 
   data("mendicato_trucantula_uniprot_processing", package = "TermineR")
 
