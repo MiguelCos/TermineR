@@ -369,7 +369,7 @@ nter_pepts_n_feat <- left_join(
 categ_canon_annot <- nter_pepts_n_feat %>%
     mutate(
       matches_p1_prime = case_when(
-        abs(as.numeric(p1_prime_position) - end) < 4 ~ TRUE,
+        abs(as.numeric(p1_prime_position) - end) <= 4 ~ TRUE,
         TRUE ~ FALSE
         )
         ) %>%
