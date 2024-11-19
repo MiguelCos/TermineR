@@ -292,9 +292,9 @@ Where:
     - Lysarginase would require `sense = "N"` and `specificity = "K|R"`.
 - `organism` is the organism used in the search. By default, the value
   is set to `"mouse"`. Currently `"human"`, `"mouse"`,
-  `"medicago_trucantula"`, `"rhizobium_melitoli"`, `"pig"`, `"ecoli"`
-  and `"arabidopsis"` are supported. Other organisms available in
-  Uniprot can be included upon request.
+  `"rat"`,`"medicago_trucantula"`, `"rhizobium_melitoli"`, `"pig"`,
+  `"ecoli"` and `"arabidopsis"` are supported. Other organisms available
+  in Uniprot can be included upon request.
 
 ## Visualization of cleavage sites
 
@@ -540,7 +540,7 @@ sessionInfo()
 
     R version 4.4.0 (2024-04-24 ucrt)
     Platform: x86_64-w64-mingw32/x64
-    Running under: Windows 11 x64 (build 22631)
+    Running under: Windows 11 x64 (build 26100)
 
     Matrix products: default
 
