@@ -1,4 +1,5 @@
-# TermineR: extracting information on endogenous proteolytic processing from shotgun proteomics data.
+# TermineR: extracting information on endogenous proteolytic processing
+from shotgun proteomics data.
 
 
 - [Installation](#installation)
@@ -290,8 +291,8 @@ Where:
     - Trypsin would require `sense = "C"` and `specificity = "K|R"`.
     - Lysarginase would require `sense = "N"` and `specificity = "K|R"`.
 - `organism` is the organism used in the search. By default, the value
-  is set to `"mouse"`. Currently `"human"`, `"mouse"`,
-  `"rat"`,`"medicago_trucantula"`, `"rhizobium_melitoli"`, `"pig"`,
+  is set to `"mouse"`. Currently `"human"`, `"mouse"`, `"rat"`,
+  `"yeast"`, `"medicago_trucantula"`, `"rhizobium_melitoli"`, `"pig"`,
   `"ecoli"` and `"arabidopsis"` are supported. Other organisms available
   in Uniprot can be included upon request.
 
