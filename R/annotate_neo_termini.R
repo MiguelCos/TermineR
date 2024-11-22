@@ -346,10 +346,16 @@ if(organism == "mouse"){
 
   uniprot_processing <- rat_uniprot_processing
 
+  } else if(organism == "yeast"){
+  
+  data("yeast_uniprot_processing", package = "TermineR")
+    
+  uniprot_processing <- yeast_uniprot_processing
+  
   } else if(organism %in% expected_organisms == FALSE){
     
-  stop("Organism not found in our list of annotations. Check documentation for list of supported organisms.")
-  
+    stop("Organism not found in our list of annotations. Check documentation for list of supported organisms.")
+    
   }
  
 df_mol_proc_feat <- uniprot_processing %>%
