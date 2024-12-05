@@ -7,6 +7,7 @@
 #' @param specificity amino acid specificity of the cleavage site. Example: "K|R" for trypsin.
 #' @param organism organism of the fasta file. Default is "mouse". Other options are "human", "medicago_trucantula", "rhizobium_melitoli", "pig", "human_iso", "ecoli" and "arabidopsis".
 #' @param distinct logical. If TRUE, keep only one peptide sequence per feature. Default is TRUE.
+#' @param n_residues_area number of residues to consider around the cleavage area. Default is 10. Example: if n_residues_area = 10, the cleavagea are would be 10 residues before and 10 residues after the cleavage site.
 #'
 #' @format A data frame with at least 28 columns
 #' \describe{
