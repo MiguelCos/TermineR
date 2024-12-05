@@ -524,6 +524,8 @@ final_annotated_df <- left_join(
     specificity,
     five_res_before,
     five_res_after,
+    x_res_before,
+    x_res_after,
     cleavage_site,
     cleavage_sequence,
     p1_position,
