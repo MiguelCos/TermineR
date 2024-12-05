@@ -179,28 +179,26 @@ prot2pept2fasta <- left_join(
     x_res_before = case_when(
         specificity == "semi_Nterm" & start_position - n_residues_area <= 1 ~ str_sub(protein_sequence, 1, start_position - 1),
         specificity == "semi_Nterm" & start_position - n_residues_area > 1 ~ str_sub(protein_sequence, start_position - n_residues_area, start_position - 1),
-        #specificity == "semi_Cterm" & end_position + 5 >= str_length(protein_sequence) ~ str_sub(protein_sequence, end_position - 4, str_length(protein_sequence)),
-        #specificity == "semi_Cterm" & end_position + 5 < str_length(protein_sequence) ~ str_sub(protein_sequence, end_position - 4, end_position),
-        specificity == "semi_Cterm" ~ str_sub(protein_sequence, end_position - (1 - n_residues_area), end_position),
+        specificity == "semi_Cterm" ~ str_sub(protein_sequence, end_position - (n_residues_area - 1), end_position),
         specificity == "specific" & nterm_modif %in% expected_modifications & start_position - n_residues_area <= 1 ~ str_sub(protein_sequence, 1, start_position - 1),
         specificity == "specific" & nterm_modif %in% expected_modifications & start_position - n_residues_area > 1 ~ str_sub(protein_sequence, start_position - n_residues_area, start_position - 1),
         specificity == "specific" & !nterm_modif %in% expected_modifications & start_position - n_residues_area <= 1 ~ str_sub(protein_sequence, 1, start_position - 1),
         specificity == "specific" & !nterm_modif %in% expected_modifications & start_position - n_residues_area > 1 ~ str_sub(protein_sequence, start_position - n_residues_area, start_position - 1)
     ),
     x_res_after = case_when(
-        specificity == "semi_Nterm" & start_position + (1 - n_residues_area) < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + (1 - n_residues_area)),
-        specificity == "semi_Nterm" & start_position + (1 - n_residues_area) >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence)),
-        specificity == "semi_Cterm" & end_position + (1 - n_residues_area) < str_length(protein_sequence) ~ str_sub(protein_sequence, end_position + 1, end_position + n_residues_area),
-        specificity == "semi_Cterm" & end_position + (1 - n_residues_area) >= str_length(protein_sequence) ~ str_sub(protein_sequence, end_position + 1, str_length(protein_sequence)),
-        specificity == "specific" & nterm_modif %in% expected_modifications & start_position + (1 - n_residues_area) < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + (1 - n_residues_area)),
-        specificity == "specific" & nterm_modif %in% expected_modifications & start_position + (1 - n_residues_area) >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence)),
-        specificity == "specific" & !nterm_modif %in% expected_modifications & start_position + (1 - n_residues_area) < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + (1 - n_residues_area)),
-        specificity == "specific" & !nterm_modif %in% expected_modifications & start_position + (1 - n_residues_area) >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence))
+        specificity == "semi_Nterm" & start_position + (n_residues_area - 1) < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + (n_residues_area - 1)),
+        specificity == "semi_Nterm" & start_position + (n_residues_area - 1) >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence)),
+        specificity == "semi_Cterm" & end_position + n_residues_area < str_length(protein_sequence) ~ str_sub(protein_sequence, end_position + 1, end_position + n_residues_area),
+        specificity == "semi_Cterm" & end_position + n_residues_area >= str_length(protein_sequence) ~ str_sub(protein_sequence, end_position + 1, str_length(protein_sequence)),
+        specificity == "specific" & nterm_modif %in% expected_modifications & start_position + (n_residues_area - 1) < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + (n_residues_area - 1)),
+        specificity == "specific" & nterm_modif %in% expected_modifications & start_position + (n_residues_area - 1) >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence)),
+        specificity == "specific" & !nterm_modif %in% expected_modifications & start_position + (n_residues_area - 1) < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + (n_residues_area - 1)),
+        specificity == "specific" & !nterm_modif %in% expected_modifications & start_position + (n_residues_area - 1) >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence))
     )
     ) %>%
   mutate(
-    x_res_after = str_pad(x_res_after, 5, side = "right", pad = "X"),
-    x_res_before = str_pad(x_res_before, 5, side = "left", pad = "X")
+    x_res_after = str_pad(x_res_after, n_residues_area, side = "right", pad = "X"),
+    x_res_before = str_pad(x_res_before, n_residues_area, side = "left", pad = "X")
   ) %>%
   mutate(
     cleavage_site = paste0(
