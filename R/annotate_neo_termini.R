@@ -528,6 +528,7 @@ final_annotated_df <- left_join(
     x_res_after,
     cleavage_site,
     cleavage_sequence,
+    cleavage_sequence_x,
     p1_position,
     p1_prime_position,
     p1_residue,
