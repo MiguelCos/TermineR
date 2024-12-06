@@ -7,6 +7,7 @@
 #' @param specificity amino acid specificity of the cleavage site. Example: "K|R" for trypsin.
 #' @param organism organism of the fasta file. Default is "mouse". Other options are "human", "medicago_trucantula", "rhizobium_melitoli", "pig", "human_iso", "ecoli" and "arabidopsis".
 #' @param distinct logical. If TRUE, keep only one peptide sequence per feature. Default is TRUE.
+#' @param n_residues_area number of residues to consider around the cleavage area. Default is 10. Example: if n_residues_area = 10, the cleavagea are would be 10 residues before and 10 residues after the cleavage site.
 #'
 #' @format A data frame with at least 28 columns
 #' \describe{
@@ -67,6 +68,7 @@ annotate_neo_termini <- function(
   sense,
   specificity,
   organism,
+  n_residues_area = 10, # number of residues to consider around the cleavage area (n before and n after)
   distinct = TRUE){
 
   require(dplyr)
@@ -174,6 +176,31 @@ prot2pept2fasta <- left_join(
     five_res_before = str_pad(five_res_before, 5, side = "left", pad = "X")
   ) %>%
   mutate(
+    x_res_before = case_when(
+        specificity == "semi_Nterm" & start_position - n_residues_area <= 1 ~ str_sub(protein_sequence, 1, start_position - 1),
+        specificity == "semi_Nterm" & start_position - n_residues_area > 1 ~ str_sub(protein_sequence, start_position - n_residues_area, start_position - 1),
+        specificity == "semi_Cterm" ~ str_sub(protein_sequence, end_position - (n_residues_area - 1), end_position),
+        specificity == "specific" & nterm_modif %in% expected_modifications & start_position - n_residues_area <= 1 ~ str_sub(protein_sequence, 1, start_position - 1),
+        specificity == "specific" & nterm_modif %in% expected_modifications & start_position - n_residues_area > 1 ~ str_sub(protein_sequence, start_position - n_residues_area, start_position - 1),
+        specificity == "specific" & !nterm_modif %in% expected_modifications & start_position - n_residues_area <= 1 ~ str_sub(protein_sequence, 1, start_position - 1),
+        specificity == "specific" & !nterm_modif %in% expected_modifications & start_position - n_residues_area > 1 ~ str_sub(protein_sequence, start_position - n_residues_area, start_position - 1)
+    ),
+    x_res_after = case_when(
+        specificity == "semi_Nterm" & start_position + (n_residues_area - 1) < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + (n_residues_area - 1)),
+        specificity == "semi_Nterm" & start_position + (n_residues_area - 1) >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence)),
+        specificity == "semi_Cterm" & end_position + n_residues_area < str_length(protein_sequence) ~ str_sub(protein_sequence, end_position + 1, end_position + n_residues_area),
+        specificity == "semi_Cterm" & end_position + n_residues_area >= str_length(protein_sequence) ~ str_sub(protein_sequence, end_position + 1, str_length(protein_sequence)),
+        specificity == "specific" & nterm_modif %in% expected_modifications & start_position + (n_residues_area - 1) < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + (n_residues_area - 1)),
+        specificity == "specific" & nterm_modif %in% expected_modifications & start_position + (n_residues_area - 1) >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence)),
+        specificity == "specific" & !nterm_modif %in% expected_modifications & start_position + (n_residues_area - 1) < str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, start_position + (n_residues_area - 1)),
+        specificity == "specific" & !nterm_modif %in% expected_modifications & start_position + (n_residues_area - 1) >= str_length(protein_sequence) ~ str_sub(protein_sequence, start_position, str_length(protein_sequence))
+    )
+    ) %>%
+  mutate(
+    x_res_after = str_pad(x_res_after, n_residues_area, side = "right", pad = "X"),
+    x_res_before = str_pad(x_res_before, n_residues_area, side = "left", pad = "X")
+  ) %>%
+  mutate(
     cleavage_site = paste0(
         five_res_before,
         " | ",
@@ -182,6 +209,10 @@ prot2pept2fasta <- left_join(
     cleavage_sequence = paste0(
         five_res_before,
         five_res_after
+      ),
+    cleavage_sequence_x = paste0(
+        x_res_before,
+        x_res_after
       ),
     p1_position = case_when(
       specificity == "semi_Nterm" ~ start_position - 1,
@@ -493,8 +524,11 @@ final_annotated_df <- left_join(
     specificity,
     five_res_before,
     five_res_after,
+    x_res_before,
+    x_res_after,
     cleavage_site,
     cleavage_sequence,
+    cleavage_sequence_x,
     p1_position,
     p1_prime_position,
     p1_residue,
