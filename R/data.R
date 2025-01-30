@@ -163,6 +163,7 @@
 #' @source Uniprot API (queried on September 2024)
 "ecoli_uniprot_processing"
 
+
 #' @title Rattus norvegicus protein processing annotation from Uniprot API
 #'
 #' @description Tabular annotation of processing information as obtained from Uniprot API
