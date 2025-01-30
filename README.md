@@ -1,4 +1,5 @@
-# TermineR: extracting information on endogenous proteolytic processing from shotgun proteomics data.
+# TermineR: extracting information on endogenous proteolytic processing
+from shotgun proteomics data.
 
 
 - [Installation](#installation)
@@ -10,7 +11,6 @@
   - [Differential abundance analysis](#differential-abundance-analysis)
 - [Minimal example](#minimal-example)
 - [Extended example](#extended-example)
-- [Citing *TermineR*](#citing-terminer)
 
 # Installation
 
@@ -175,8 +175,7 @@ The basic usage of the `diann_adapter` function is as follows:
 ``` r
 diann_adapter(
   path_to_file,
-  proteotypic  = TRUE,
-  summarization = "SUM"
+  proteotypic  = TRUE
 )
 ```
 
@@ -290,10 +289,10 @@ Where:
     - Trypsin would require `sense = "C"` and `specificity = "K|R"`.
     - Lysarginase would require `sense = "N"` and `specificity = "K|R"`.
 - `organism` is the organism used in the search. By default, the value
-  is set to `"mouse"`. Currently `"human"`, `"mouse"`, `"rat"`,
-  `"yeast"`, `"medicago_trucantula"`, `"rhizobium_melitoli"`, `"pig"`,
-  `"ecoli"` and `"arabidopsis"` are supported. Other organisms available
-  in Uniprot can be included upon request.
+  is set to `"mouse"`. Currently `"human"`, `"mouse"`,
+  `"mendicato_trucantula"` and `"rhizobium_melitoli"` and `"pig"` are
+  supported. Other organisms available in Uniprot can be included upon
+  request.
 
 ## Visualization of cleavage sites
 
@@ -389,7 +388,7 @@ fragpipe_out_location <-  here::here("data-raw/pkd_mouse_model_search")
 # Execute the adapter function
 df_from_fragpipe <- fragpipe_adapter(
   parent_dir = fragpipe_out_location,
-  ref_sample = NULL, # it is important to define as NULL for single mixture experiments
+  ref_sample = NULL, # it is important to define as NULL for mono mixtures
   grouping_var = "nterm_modif_peptide",
   tmt_delta = "304")
 ```
@@ -521,25 +520,13 @@ results. Users can access the extended example in this repository
 following this
 [link](https://github.com/MiguelCos/TermineR/blob/main/terminomics_analysis_workflow.md).
 
-# Citing *TermineR*
-
-If you use the *TermineR* package in your research, please cite the
-following publication:
-
-Cosenza-Contreras, M., Seredynska, A., Vogele, D., Pinter, N.,
-Brombacher, E., Cueto, R. F., Dinh, T-L. J., Bernhard, P., Rogg, M.,
-Liu, J., Willems, P., Stael, S., Huesgen, P., Kuehn, E. W., Kreutz, C.,
-Schell, C., & Schilling, O. (2024). TermineR: extracting information on
-endogenous proteolytic processing from shotgun proteomics data.
-Proteomics, e2300491. https://doi.org/10.1002/pmic.202300491.
-
 ``` r
 sessionInfo()
 ```
 
     R version 4.4.0 (2024-04-24 ucrt)
     Platform: x86_64-w64-mingw32/x64
-    Running under: Windows 11 x64 (build 26100)
+    Running under: Windows 11 x64 (build 22631)
 
     Matrix products: default
 

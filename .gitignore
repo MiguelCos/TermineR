@@ -2,3 +2,15 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rproj
+TermineR.Rproj
+
+/data-raw/
+/manuscript_figures/
+/revision/
+/scr/check_modifications_structure_diann_output.R
+
+percentage_of_nterm_tryptic.qmd
+README.qmd
+DATASET.R
+download_and_process_unimod.R
