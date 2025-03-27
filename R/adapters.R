@@ -1055,6 +1055,7 @@ psm_tsv_sel <- psm_tsv %>%
         str_detect(`Assigned Modifications`, "N-term\\(28.031[0-9]\\)") ~ "Dimethyl",
         str_detect(`Assigned Modifications`, "N-term\\(36.075[0-9]\\)") ~ "Dimethyl",
         str_detect(`Assigned Modifications`, "N-term\\(34.063[0-9]\\)") ~ "Dimethyl",
+        str_detect(`Assigned Modifications`, "N-term\\(7.947[0-9]\\)") ~ "Acetyl", # when dimethyl 34 is set as fixed N-term modif
         str_detect(`Assigned Modifications`, "N-term\\(89.030[0-9]\\)") ~ "2PCA",
         TRUE ~ "n"
       )
