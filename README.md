@@ -249,10 +249,48 @@ Where:
     names of the search files in the `psm.tsv` output files.
   - `sample`: sample name. Can be user-define. Usually defines the
     experimental condition and the biological replicate number.
-  - An example of this file can be found in this repo [here]().
+  - An example of this file can be found in this repo [here](https://github.com/MiguelCos/TermineR/blob/main/data-raw/proca_shotgun_label_free_semi_tryptic/annotation.txt).
 
 We have included a minimal example on the usage of the
-`fragpipe_lf_adapter` function in the [label-free example workflow]().
+`fragpipe_lf_adapter` function in the [label-free example workflow](https://github.com/MiguelCos/TermineR/blob/main/terminomics_analysis_workflow_label_free.md).
+
+### FragPipe label-free with isotopic labelling on MS1 level (i.e., heavy/light dimethyl)  
+
+**Note**: This function is in a development version that we expect to generalize and test further.
+
+This function will process the `combined_modified_peptide_label_quant.tsv` file from a FragPipe label-free search of isotopic labelling on MS1 level data.
+
+
+The function will summarize the modified peptides with their heavy/light isotopic MS1 abundances by 
+`nterm_modif_peptide` for N-terminal modified peptides, and will
+then perform standadization of the feature intensties based on MAD
+scaling (as described
+[here](https://doi.org/10.1016/j.cell.2019.10.007)). Currently the
+function is compatible with the annotation of light and heavy Dimethyl
+modifications (delta = 28.031/34.063 Da) and acetyl at the N-termini.
+
+The basic usage of the `fragpipe_dda_heavy_light_adapter` function is as follows:
+
+``` r
+fragpipe_dda_heavy_light_adapter(
+  combined_modified_peptide_file,
+  annotation_file_path,
+  grouping_var = "nterm_modif_peptide")
+```
+
+Where:
+
+- `combined_modified_peptide_file` is the path to file combined_modified_peptide_label_quant.tsv file from FragPipe.
+- `grouping_var` is the variable used to group the peptides. By default,
+  the grouping is done by the N-terminal modified peptide sequence
+  (`"nterm_modif_peptide"`).
+- `annotation_file_path`: path to an `annotation.txt` file, containing
+  at least two columns:
+  - `run`: the name of the LC-MS/MS runs. The names should match the
+    names of the search files in the `psm.tsv` output files.
+  - `sample`: sample name. Can be user-define. Usually defines the
+    experimental condition and the biological replicate number.
+  - An example of this file can be found in this repo [here](https://github.com/MiguelCos/TermineR/blob/main/data-raw/proca_shotgun_label_free_semi_tryptic/annotation.txt).
 
 ## Peptide annotation
 
@@ -293,7 +331,7 @@ Where:
   `"mendicato_trucantula"` and `"rhizobium_melitoli"`, `"pig"`, `"arabidopsis"`, `"ecoli"`, `"rat"`, `"yeast"` are
   supported. Other organisms available in Uniprot can be included upon
   request.
-
+  
 ## Visualization of cleavage sites
 
 After identifying a set of peptides or cleavage events of interest
