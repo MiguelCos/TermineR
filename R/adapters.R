@@ -1128,3 +1128,163 @@ psm_tsv_sel <- psm_tsv %>%
 
   return(df_final_abundance)
 }
+#' Process combined_modified_peptide_label_quant.tsv file from FragPipe label-free search results of isotopic labelling on MS1 level, for further analysis with TermineR
+#'
+#' @title fragpipe_dda_heavy_light_adapter
+#' @param combined_modified_peptide_file path to file combined_modified_peptide_label_quant.tsv file from FragPipe.
+#' @param annotation_file_path path to the annotation file with sample names. It should contain at least two colums: `run`, matching the name of the LC-MS/MS run, and `sample_name`, with a readable sample identifier.
+#' @param grouping_var define the grouping variable for MAD scaling. Default is "nterm_modif_peptide" for normalization at the feature level of "Peptide + N-terminal modification".
+#'
+#' @format A data frame with at least 4 columns
+#' \describe{
+#'  \item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
+#'  \item{nterm_modif}{N-terminal modification}
+#'  \item{peptide}{Peptide sequence}
+#'  \item{protein}{Protein ID based on Uniprot Accession}
+#' }
+#'
+#'
+#' @description
+#' Process combined_modified_peptide_label_quant.tsv file from FragPipe label-free search results of isotopic labelling on MS1 level, for further analysis with TermineR
+#'
+#' @importFrom dplyr mutate filter select bind_rows left_join group_by summarize ungroup arrange distinct slice_max
+#' @importFrom tidyr pivot_wider separate
+#' @importFrom stringr str_detect str_remove
+#' @importFrom readr read_tsv
+#' @importFrom here here
+#' @importFrom magrittr %>%
+#'
+#' @export
+#' @author Miguel Cosenza-Contreras
+fragpipe_dda_heavy_light_adapter <- function(
+    combined_modified_peptide_file,
+    annotation_file_path,
+    grouping_var = "nterm_modif_peptide") {
+  
+  combined_lqb_quant <- read_tsv(
+    combined_modified_peptide_file
+  ) %>%
+    janitor::clean_names()
+  
+  annotation_txt <- read_tsv(annotation_file_path) %>%
+    na.omit()
+  
+  processed_df <- combined_lqb_quant %>%
+    mutate(
+      nterm_modif = case_when(
+        str_detect(modified_peptide, "n\\[42.010[0-9]\\]") ~ "Acetyl",
+        str_detect(modified_peptide, "n\\[42.010[0-9]\\]", negate = TRUE) &
+          (str_detect(light_modified_peptide, "n\\[28.031[0-9]\\]") |
+             str_detect(heavy_modified_peptide, "n\\[34.063[0-9]\\]")) ~ "Dimethyl",
+        TRUE ~ "n"
+      ),
+      peptide = peptide_sequence,
+    ) %>%
+    separate(
+      protein,
+      into = c("sp", "protein", "protein_description"),
+      sep = "\\|"
+    ) %>%
+    mutate(
+      nterm_modif_peptide = paste(
+        nterm_modif,
+        peptide_sequence,
+        sep = "_"
+      )
+    ) %>%
+    dplyr::select(
+      nterm_modif_peptide,
+      nterm_modif,
+      peptide,
+      protein,
+      matches("_max_lfq_")
+    ) 
+  
+  processed_df_long <- processed_df %>%
+    pivot_longer(
+      cols = matches("_max_lfq_"),
+      names_to = "sample_label",
+      values_to = "intensity"
+    ) %>% 
+    mutate(
+      label = case_when(
+        str_detect(
+          sample_label, 
+          "heavy") ~ "heavy",
+        str_detect(
+          sample_label,
+          "light") ~ "light"
+      )
+    ) %>%
+    mutate(
+      sample_name = str_to_upper(
+        str_remove(
+          sample_label, 
+          "_heavy_max_lfq_intensity|_light_max_lfq_intensity"))) %>%
+    left_join(.,
+              annotation_txt) 
+  
+  processed_df_long_sel <- processed_df_long %>%
+    dplyr::select(
+      nterm_modif_peptide,
+      nterm_modif,
+      peptide,
+      protein,
+      sample_label,
+      intensity,
+      sample = sample_label
+    ) 
+  
+  scaled_ratios <- processed_df_long_sel %>%
+    mutate(log2_intensity = log2(intensity)) %>%
+    group_by(.data[[grouping_var]], sample) %>%
+    summarize(log2_rat2ref_group = median(log2_intensity, na.rm = TRUE), .groups = "drop") %>%
+    group_by(sample) %>%
+    mutate(Mi = median(log2_rat2ref_group, na.rm = TRUE)) %>%
+    ungroup() %>%
+    mutate(M0 = median(Mi, na.rm = TRUE)) %>%
+    mutate(RCij = log2_rat2ref_group - Mi) %>%
+    group_by(sample) %>%
+    mutate(MADi = median(abs(RCij), na.rm = TRUE)) %>%
+    ungroup() %>%
+    mutate(MAD0 = median(MADi, na.rm = TRUE)) %>%
+    ungroup() %>%
+    mutate(RNij = (RCij / MADi) * MAD0 + M0) %>%
+    mutate(RNij = case_when(
+      RNij == -Inf ~ NA,
+      RNij == Inf ~ NA,
+      TRUE ~ RNij
+    ))
+  
+  pept2prot2modif <- processed_df_long_sel %>%
+    dplyr::select(
+      nterm_modif_peptide,
+      nterm_modif,
+      peptide,
+      protein) %>%
+    distinct()
+  
+  df_final_abundance <- scaled_ratios %>%
+    dplyr::select(all_of(c(
+      grouping_var, 
+      "sample", 
+      "RNij"))) %>%
+    mutate(
+      sample = str_remove(sample, "ratio_"),
+    ) %>%
+    pivot_wider(
+      names_from = "sample",
+      values_from = "RNij"
+    ) %>%
+    left_join(
+      pept2prot2modif, 
+      by = grouping_var) %>%
+    dplyr::relocate(
+      nterm_modif_peptide,
+      peptide,
+      nterm_modif,
+      protein
+    )
+  
+  return(df_final_abundance)
+}
