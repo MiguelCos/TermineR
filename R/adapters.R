@@ -812,6 +812,7 @@ diann_adapter <- function(
     mutate(
       nterm_modif = case_when(
         str_detect(nterm_modif, "Dimethyl") ~ "Dimethyl",
+        str_detect(nterm_modif, "TMT") ~ "TMT",
         TRUE ~ nterm_modif
       )
     ) %>% 
