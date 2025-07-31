@@ -6,10 +6,7 @@
 #' @param peptide_annot A data frame with the annotation of the peptides. It should contain at least a 'nterm_modif_peptide' column, matching the 'nterm_modif_peptide' column in the peptide data frame, and the 'specificity' column.
 #' @param summarize_by_specificity A logical value indicating if the protein abundances should be summarized based on specific peptides. Default is TRUE.
 #'
-#' @description
-#'  This is an experimental function for the normalization of peptides abundances against the abundance of their respective proteins.
-#'  The protein abundances are summarized from the peptide feature abundance information based on fully specific peptides, as a proxy for the protein abundance disregarding the effect of proteolytic activity.
-#'  Then, peptide-to-protein abundance ratios are calculated based on raw intensities and log2 transformed for downstream processing.
+#' @description This is an experimental function for the normalization of peptides abundances against the abundance of their respective proteins. The protein abundances are summarized from the peptide feature abundance information based on fully specific peptides, as a proxy for the protein abundance disregarding the effect of proteolytic activity. Then, peptide-to-protein abundance ratios are calculated based on raw intensities and log2 transformed for downstream processing.
 #'
 #' @importFrom dplyr select filter pull mutate group_by summarise_if rename_at arrange slice relocate
 #' @importFrom purrr map
