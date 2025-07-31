@@ -140,7 +140,7 @@ prot2pept2fasta <- left_join(
       sense == "C" & str_detect(last_aa, specificity, negate = TRUE) & str_detect(aa_before, specificity) & !is.na(aa_after) ~ "semi_Cterm",
       sense == "N" & str_detect(first_aa, specificity) & str_detect(aa_after, specificity, negate = TRUE) & !is.na(aa_after) ~ "semi_Cterm",
       sense == "N" & str_detect(first_aa, specificity, negate = TRUE) & str_detect(aa_after, specificity) & !is.na(aa_before) ~ "semi_Nterm",
-      sense == "C" & str_detect(last_aa, specificity, negate = TRUE) & str_detect(aa_before, specificity, negate = TRUE) & !is.na(aa_before) & !is.na(aa_after) & aa_before == "M" ~ "semi_Cterm",
+      sense == "C" & str_detect(last_aa, specificity, negate = TRUE) & str_detect(aa_before, specificity, negate = TRUE) & !is.na(aa_before) & !is.na(aa_after) & aa_before == "M" ~ "semi_Nterm",
       sense == "C" & str_detect(aa_before, specificity, negate = TRUE) & !is.na(aa_before) & is.na(aa_after) ~ "semi_Nterm",
       sense == "C" & str_detect(last_aa, specificity, negate = TRUE) & !is.na(aa_after) & is.na(aa_before) ~ "semi_Cterm",
       sense == "C" & str_detect(last_aa, specificity, negate = TRUE) & str_detect(aa_before, specificity, negate = TRUE) & !is.na(aa_before) & !is.na(aa_after) & aa_before != "M" ~ "unspecific",
