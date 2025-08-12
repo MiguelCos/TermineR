@@ -20,7 +20,7 @@ fragpipe_dda_heavy_light_adapter(
 )
 }
 \arguments{
-\item{combined_modified_peptide_file}{path to file with FragPipe combined_modified_peptide_label_quant.tsv file}
+\item{combined_modified_peptide_file}{path to file combined_modified_peptide_label_quant.tsv file from FragPipe.}
 
 \item{annotation_file_path}{path to the annotation file with sample names. It should contain at least two colums: \code{run}, matching the name of the LC-MS/MS run, and \code{sample_name}, with a readable sample identifier.}
 
