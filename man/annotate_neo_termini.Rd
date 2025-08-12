@@ -62,7 +62,7 @@ annotate_neo_termini(
 
 \item{specificity}{amino acid specificity of the cleavage site. Example: "K|R" for trypsin.}
 
-\item{organism}{organism of the fasta file. Default is "mouse". Other options are "human", "medicago_trucantula", "rhizobium_melitoli", "pig", "human_iso", "ecoli", "arabidopsis", "rat", "yeast", and "c_elegans".}
+\item{organism}{organism of the fasta file. Default is "mouse". Other options are "human", "medicago_trucantula", "rhizobium_melitoli", "pig", "human_iso", "ecoli", "arabidopsis", "rat", "yeast", and "c_elegans". Each organism provides UniProt-curated protein processing annotations including signal peptides, transit peptides, propeptides, and mature protein chains.}
 
 \item{n_residues_area}{number of residues to consider around the cleavage area. Default is 10. Example: if n_residues_area = 10, the cleavagea are would be 10 residues before and 10 residues after the cleavage site.}
 
@@ -73,6 +73,37 @@ Annotate peptides and associated cleavage events.
 }
 \details{
 Annotate peptides and associated cleavage events
+}
+\examples{
+\dontrun{
+# Basic usage with mouse annotations
+annotated_peptides <- annotate_neo_termini(
+  peptides_df = my_peptides,
+  fasta_location = "path/to/mouse_proteins.fasta",
+  sense = "C",
+  specificity = "K|R",
+  organism = "mouse"
+)
+
+# Using C. elegans annotations
+annotated_peptides_celegans <- annotate_neo_termini(
+  peptides_df = my_peptides,
+  fasta_location = "path/to/c_elegans_proteins.fasta",
+  sense = "C",
+  specificity = "K|R",
+  organism = "c_elegans"
+)
+
+# Using human annotations with isoforms
+annotated_peptides_human <- annotate_neo_termini(
+  peptides_df = my_peptides,
+  fasta_location = "path/to/human_proteins.fasta",
+  sense = "C",
+  specificity = "K|R",
+  organism = "human_iso"
+)
+}
+
 }
 \author{
 Miguel Cosenza-Contreras
