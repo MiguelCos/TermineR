@@ -15,6 +15,12 @@
 #' @importFrom tibble as_tibble column_to_rownames tibble
 #' @importFrom magrittr %>%
 #'
+#' @return A list with two elements: 
+#' \describe{
+#'  \item{peptide_matrix}{Matrix of split amino acid sequences for each peptide in the cleavage area}
+#'  \item{amino_acid_count}{Matrix of amino acid counts per position in the cleavage area}
+#' }
+#'
 #' @export
 #' @author Miguel Cosenza-Contreras
 cleavage_area_matrix <- function(peptides,

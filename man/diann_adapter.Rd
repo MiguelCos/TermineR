@@ -3,15 +3,6 @@
 \name{diann_adapter}
 \alias{diann_adapter}
 \title{diann_adapter}
-\format{
-A data frame with at least 4 columns
-\describe{
-\item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
-\item{nterm_modif}{N-terminal modification. Currently no N-terminal modification is supported for DIANN data}
-\item{peptide}{Peptide sequence}
-\item{protein}{Protein ID based on Uniprot Accession}
-}
-}
 \usage{
 diann_adapter(path_to_file, proteotypic = TRUE, summarization = "SUM")
 }
@@ -23,6 +14,15 @@ diann_adapter(path_to_file, proteotypic = TRUE, summarization = "SUM")
 \item{summarization}{quantitative summarization approach for features identified by several precursors.
 "SUM" will sum up the intensities of the precursors. "MAX" will keep the intensity of the precursor with higher intensity.
 Default is "SUM".}
+}
+\value{
+A data frame with at least 4 columns
+\describe{
+\item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
+\item{nterm_modif}{N-terminal modification. Currently no N-terminal modification is supported for DIANN data}
+\item{peptide}{Peptide sequence}
+\item{protein}{Protein ID based on Uniprot Accession}
+}
 }
 \description{
 Process report file from DIANN search results for further analysis with TermineR

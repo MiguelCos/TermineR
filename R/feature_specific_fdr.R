@@ -15,6 +15,8 @@
 #' @importFrom magrittr %>%
 #' @importFrom stats p.adjust
 #'
+#' @return A data frame with adjusted p-values and a column `fdr_correction` indicating whether the row was corrected as "feature-specific" or "global".
+#'
 #' @export
 #' @author Miguel Cosenza-Contreras
 feature_fdr_correction <- function (

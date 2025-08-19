@@ -3,7 +3,33 @@
 \name{annotate_neo_termini}
 \alias{annotate_neo_termini}
 \title{annotate_neo_termini}
-\format{
+\usage{
+annotate_neo_termini(
+  peptides_df,
+  fasta_location,
+  sense,
+  specificity,
+  organism,
+  n_residues_area = 10,
+  distinct = TRUE
+)
+}
+\arguments{
+\item{peptides_df}{peptide data frame as obtained from one of the adapter functions. Must contain columns nterm_modif_peptide, nterm_modif, peptide, protein and one quantitative column per sample.}
+
+\item{fasta_location}{location of the fasta file containing the protein sequences identified in the sample, in uniprot format.}
+
+\item{sense}{direction of the peptide cleavage. One of "N" or "C".}
+
+\item{specificity}{amino acid specificity of the cleavage site. Example: "K|R" for trypsin.}
+
+\item{organism}{organism of the fasta file. Default is "mouse". Other options are "human", "medicago_trucantula", "rhizobium_melitoli", "pig", "human_iso", "ecoli", "arabidopsis", "rat", "yeast", and "c_elegans".}
+
+\item{n_residues_area}{number of residues to consider around the cleavage area. Default is 10. Example: if n_residues_area = 10, the cleavagea are would be 10 residues before and 10 residues after the cleavage site.}
+
+\item{distinct}{logical. If TRUE, keep only one peptide sequence per feature. Default is TRUE.}
+}
+\value{
 A data frame with at least 28 columns
 \describe{
 \item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
@@ -41,32 +67,6 @@ maps to a Uniprot protein ID that does not have processing features information.
 \item{protein_sequence}{Protein sequence}
 \item{sample_columns}{Scaled abundances of annotated features per sample}
 }
-}
-\usage{
-annotate_neo_termini(
-  peptides_df,
-  fasta_location,
-  sense,
-  specificity,
-  organism,
-  n_residues_area = 10,
-  distinct = TRUE
-)
-}
-\arguments{
-\item{peptides_df}{peptide data frame as obtained from one of the adapter functions. Must contain columns nterm_modif_peptide, nterm_modif, peptide, protein and one quantitative column per sample.}
-
-\item{fasta_location}{location of the fasta file containing the protein sequences identified in the sample, in uniprot format.}
-
-\item{sense}{direction of the peptide cleavage. One of "N" or "C".}
-
-\item{specificity}{amino acid specificity of the cleavage site. Example: "K|R" for trypsin.}
-
-\item{organism}{organism of the fasta file. Default is "mouse". Other options are "human", "medicago_trucantula", "rhizobium_melitoli", "pig", "human_iso", "ecoli", "arabidopsis", "rat", "yeast", and "c_elegans".}
-
-\item{n_residues_area}{number of residues to consider around the cleavage area. Default is 10. Example: if n_residues_area = 10, the cleavagea are would be 10 residues before and 10 residues after the cleavage site.}
-
-\item{distinct}{logical. If TRUE, keep only one peptide sequence per feature. Default is TRUE.}
 }
 \description{
 Annotate peptides and associated cleavage events.
