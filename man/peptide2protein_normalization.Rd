@@ -3,15 +3,6 @@
 \name{peptide2protein_normalization}
 \alias{peptide2protein_normalization}
 \title{peptide2protein_normalization}
-\format{
-A list of 4 elements
-\describe{
-\item{protein_normalized_pepts_scaled}{Matrix of peptide abundances scaled, after extracting fraction of peptide/protein fraction of abundance}
-\item{protein_normalized_pepts_abundance}{Matrix of peptide abundances non-scaled, after extracting fraction of peptide/protein fraction of abundance}
-\item{summarized_protein_abundance}{Summarized protein abundances based on peptide matrix}
-\item{summarized_protein_abundance_scaled}{Summarized protein abundances based on peptide matrix, scaled}
-\item{summarize_by_specificity}{Object showing if the protein abundances were summarized by specific peptides}
-}
 \usage{
 peptide2protein_normalization(
   peptides,
@@ -29,10 +20,18 @@ peptide2protein_normalization(
 
 \item{summarize_by_specificity}{A logical value indicating if the protein abundances should be summarized based on specific peptides. Default is TRUE.}
 }
+\value{
+A list with the following elements
+\describe{
+\item{protein_normalized_pepts_scaled}{Matrix of peptide abundances scaled, after extracting fraction of peptide/protein fraction of abundance}
+\item{protein_normalized_pepts_abundance}{Matrix of peptide abundances non-scaled, after extracting fraction of peptide/protein fraction of abundance}
+\item{summarized_protein_abundance}{Summarized protein abundances based on peptide matrix}
+\item{summarized_protein_abundance_scaled}{Summarized protein abundances based on peptide matrix, scaled}
+\item{summarize_by_specificity}{Logical flag indicating if protein abundances were summarized by fully specific peptides}
+}
+}
 \description{
-This is an experimental function for the normalization of peptides abundances against the abundance of their respective proteins.
-The protein abundances are summarized from the peptide feature abundance information based on fully specific peptides, as a proxy for the protein abundance disregarding the effect of proteolytic activity.
-Then, peptide-to-protein abundance ratios are calculated based on raw intensities and log2 transformed for downstream processing.
+This is an experimental function for the normalization of peptides abundances against the abundance of their respective proteins. The protein abundances are summarized from the peptide feature abundance information based on fully specific peptides, as a proxy for the protein abundance disregarding the effect of proteolytic activity. Then, peptide-to-protein abundance ratios are calculated based on raw intensities and log2 transformed for downstream processing.
 }
 \details{
 Normalize peptide abundances against their respective protein abundances.

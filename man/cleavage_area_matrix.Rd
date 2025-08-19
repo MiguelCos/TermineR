@@ -11,6 +11,13 @@ cleavage_area_matrix(peptides, p_number = 5)
 
 \item{p_number}{The number of amino acids to be considered in the cleavage area. Default is 5 for a cleavage area between P5 and P5'.}
 }
+\value{
+A list with two elements:
+\describe{
+\item{peptide_matrix}{Matrix of split amino acid sequences for each peptide in the cleavage area}
+\item{amino_acid_count}{Matrix of amino acid counts per position in the cleavage area}
+}
+}
 \description{
 Calculate positional abundance of amino acid residues from sequences of cleavage areas.
 This matrix is a preparation for visualization of the cleavage areas using the pheatmap package.

@@ -3,15 +3,6 @@
 \name{fragpipe_adapter}
 \alias{fragpipe_adapter}
 \title{fragpipe_adapter}
-\format{
-A data frame with at least 4 columns
-\describe{
-\item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
-\item{nterm_modif}{N-terminal modification}
-\item{peptide}{Peptide sequence}
-\item{protein}{Protein ID based on Uniprot Accession}
-}
-}
 \usage{
 fragpipe_adapter(
   parent_dir,
@@ -31,6 +22,15 @@ fragpipe_adapter(
 \item{min_purity}{minimum purity of the PSMs to be considered. Default is 0.5.}
 
 \item{tmt_delta}{define the TMT reporter ion mass delta. Default is "229" for TMT10/11plex. "304" for TMT16plex.}
+}
+\value{
+A data frame with at least 4 columns
+\describe{
+\item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
+\item{nterm_modif}{N-terminal modification}
+\item{peptide}{Peptide sequence}
+\item{protein}{Protein ID based on Uniprot Accession}
+}
 }
 \description{
 Process psm.tsv files from FragPipe search results for further analysis with TermineR

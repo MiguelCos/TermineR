@@ -7,7 +7,7 @@
 #' @param min_purity minimum purity of the PSMs to be considered. Default is 0.5.
 #' @param tmt_delta define the TMT reporter ion mass delta. Default is "229" for TMT10/11plex. "304" for TMT16plex.
 #'
-#' @format A data frame with at least 4 columns
+#' @return A data frame with at least 4 columns
 #' \describe{
 #'  \item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
 #'  \item{nterm_modif}{N-terminal modification}
@@ -523,7 +523,7 @@ fragpipe_adapter <- function(parent_dir,
 #' @param path_to_file path to file with Spectronaut search results in tsv format
 #' @param proteotypic keep only proteotypic peptides. Default is TRUE.
 #'
-#' @format A data frame with at least 4 columns
+#' @return A data frame with at least 4 columns
 #' \describe{
 #'  \item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
 #'  \item{nterm_modif}{N-terminal modification. Only Acetyl annotation is available in the current version}
@@ -673,7 +673,7 @@ spectronaut_adapter <- function(
 #' "SUM" will sum up the intensities of the precursors. "MAX" will keep the intensity of the precursor with higher intensity.
 #' Default is "SUM".
 #'
-#' @format A data frame with at least 4 columns
+#' @return A data frame with at least 4 columns
 #' \describe{
 #'  \item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
 #'  \item{nterm_modif}{N-terminal modification. Currently no N-terminal modification is supported for DIANN data}

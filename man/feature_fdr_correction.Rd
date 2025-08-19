@@ -13,6 +13,9 @@ feature_fdr_correction(toptable, interesting_features_table, method = "BH")
 
 \item{method}{The method to be used for multiple testing correction. Default is "BH" (Benjamini-Hochberg).}
 }
+\value{
+A data frame with adjusted p-values and a column \code{fdr_correction} indicating whether the row was corrected as "feature-specific" or "global".
+}
 \description{
 Apply multiple-testing p-value adjustment on specified features.
 This approach is based on the idea of independent hypothesis weighting,
