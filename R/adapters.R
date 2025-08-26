@@ -1046,6 +1046,7 @@ psm_tsv_sel <- psm_tsv %>%
     mutate(run = str_remove(run, ".pep.xml")) %>%
     mutate(run = str_remove(run, "interact-")) %>%
     mutate(run = str_remove(run, ".mod")) %>%
+    mutate(run = str_remove(run, "_rank\\d+$")) %>%
     dplyr::select(-`Spectrum File`) %>%
     left_join(annotation_txt) %>%
     mutate(
