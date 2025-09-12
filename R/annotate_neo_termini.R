@@ -79,6 +79,27 @@ annotate_neo_termini <- function(
   require(magrittr)
   
   data("unimod_id_to_name_mapping", package = "TermineR")
+  data("merops_sites", package = "TermineR")
+  data("merops_pssm",  package = "TermineR")
+  data("merops_accession_to_protease", package = "TermineR")
+
+# helper functions 
+
+# Score one window against one PSSM (20x8, log2 odds). Non-AA20 letters contribute 0.
+merops_score_window <- function(
+  window8,
+  pssm
+) {
+
+  AA20 <- rownames(pssm)
+
+  aa <- strsplit(window8, "", fixed = TRUE)[[1]]
+
+  idx <- match(aa, AA20)
+
+  sum(vapply(seq_along(idx), function(i) if (is.na(idx[i])) 0 else pssm[idx[i], i], numeric(1)))
+  
+}
 
   peptide2protein <- peptides_df %>%
                     dplyr::select(peptide, protein, nterm_modif) %>%
@@ -202,13 +223,13 @@ prot2pept2fasta <- left_join(
   ) %>%
   mutate(
     cleavage_site = paste0(
-        five_res_before,
+        str_sub(five_res_before, 2, 5),
         " | ",
-        five_res_after
+        str_sub(five_res_after, 1, 4)
       ),
     cleavage_sequence = paste0(
-        five_res_before,
-        five_res_after
+        str_sub(five_res_before, 2, 5), # P4..P1
+        str_sub(five_res_after, 1, 4) # P1'..P4'
       ),
     cleavage_sequence_x = paste0(
         x_res_before,
@@ -271,7 +292,8 @@ protein_nterm_modif <- annotated_df_w_quant %>%
     p1_prime_position,
     p1_residue,
     p1_prime_residue,
-    protein_length) %>%
+    protein_length,
+    cleavage_sequence) %>%
   dplyr::filter(str_detect(protein,
                            pattern = "Biognosys",
                            negate = TRUE),
@@ -291,7 +313,8 @@ protein_semi_free <- annotated_df_w_quant %>%
   p1_prime_position,
   p1_residue,
   p1_prime_residue,
-  protein_length) %>%
+  protein_length,
+  cleavage_sequence) %>%
   dplyr::filter(str_detect(protein,
                            pattern = "Biognosys",
                            negate = TRUE),
@@ -400,7 +423,7 @@ if(organism == "mouse"){
  
 df_mol_proc_feat <- uniprot_processing %>%
   dplyr::filter(
-    type %in% mol_processing_feat) %>% #, # keep only interesting features
+    type %in% mol_processing_feat) %>% # keep only interesting features
                 #!is.na(length)) %>% # exclude features with missing values
   dplyr::rename(protein = accession)  # change column name
 
@@ -449,7 +472,8 @@ categ_canon_annot <- nter_pepts_n_feat %>%
     processed_fragment_end = end,
     nterm_modif,
     specificity,
-    met_clipping) %>%
+    met_clipping,
+    cleavage_sequence) %>%
   dplyr::filter(
     processing_type != "CHAIN"
   )
@@ -498,14 +522,116 @@ categ2_pept_canannot <- bind_rows(pept_wmatch,
     dplyr::select(
       peptide,
       protein,
+      peptide_start,
+      p1_position,                      
       matches_p1_prime,
+      cleavage_sequence,
       uniprot_processing_type = processing_type,
       processing_annotation_start = processed_fragment_start,
       processing_annotation_end = processed_fragment_end
     )
 
+#### include MEROPS sites -----
+
+# Known MEROPS proteases for exact site (match on protein + position)
+# Here position is P1' index (start of peptide)
+known_map <- merops_sites %>%
+  unite(
+    "site_key",
+    uniprot_acc,
+    position,
+    remove = FALSE
+  ) %>%
+  distinct(site_key, protease_id) %>%                          # one row per site_key/id
+  left_join(
+    merops_accession_to_protease,
+    by = c("protease_id" = "protease_id")
+  ) %>%
+  group_by(site_key) %>%
+  summarise(
+    protease_merops_ids   = paste(sort(unique(protease_id)), collapse = "|"),
+    protease_merops_names = paste(sort(unique(coalesce(protease_name, protease_id))), collapse = "|"),
+    .groups = "drop"
+  )
+
+categ2_pept_canannot <- categ2_pept_canannot %>%
+  mutate(
+    p1_position = dplyr::coalesce(p1_position, peptide_start - 1L)
+  ) %>%
+  unite(
+    "site_key",
+    protein,
+    p1_position,
+    remove = FALSE
+  ) %>%
+  left_join(
+    known_map,
+    by = "site_key"
+  ) %>%
+  mutate(
+    protease_merops_ids   = coalesce(protease_merops_ids, ""),
+    protease_merops_names = coalesce(protease_merops_names, "")
+  ) %>%
+  dplyr::select(-site_key)
+
+# Predicted protease activity via PSSM (sum log2 odds across P4…P4')
+#    Keep top N for compactness.
+top_n <- 5
+pssm_tbl <- merops_pssm %>%
+  dplyr::select(protease_id, pssm)
+
+score_one <- function(w) {
+  if (is.na(w) || nchar(w) != 8) return(tibble(protease_id = character(), score = numeric()))
+  tibble(
+    protease_id = pssm_tbl$protease_id,
+    score = purrr::map_dbl(pssm_tbl$pssm, ~ merops_score_window(w, .x))
+  ) %>%
+  arrange(desc(score)) %>%
+  slice_head(n = top_n)
+}
+
+pred_scored <- categ2_pept_canannot %>%
+  dplyr::select(cleavage_sequence) %>%
+  distinct() %>%
+  mutate(pred_tbl = purrr::map(
+    cleavage_sequence,
+    score_one
+  )) %>%
+  tidyr::unnest(pred_tbl) %>%
+  # attach names for each protease_id
+  left_join(
+    merops_accession_to_protease,
+    by = c("protease_id" = "protease_id")
+  ) %>%
+  group_by(cleavage_sequence) %>%
+  summarise(
+    predicted_protease_activity_ids   = paste0(
+      protease_id, ":",
+      formatC(score, format = "f", digits = 3),
+      collapse = "|"
+    ),
+    predicted_protease_activity_names = paste0(
+      coalesce(protease_name, protease_id), ":",
+      formatC(score, format = "f", digits = 3),
+      collapse = "|"
+    ),
+    .groups = "drop"
+  )
+
+categ2_pept_canannot <- categ2_pept_canannot %>%
+  left_join(pred_scored, by = "cleavage_sequence") %>%
+  mutate(
+    predicted_protease_activity_ids   = coalesce(predicted_protease_activity_ids, ""),
+    predicted_protease_activity_names = coalesce(predicted_protease_activity_names, ""),
+    # keep old column for backward compatibility (use names)
+    predicted_protease_activity       = predicted_protease_activity_names
+  )
+
+# final annotated df (clean)
+
 final_annotated_df <- left_join(
-    annotated_df_w_quant %>% dplyr::rename(
+    annotated_df_w_quant %>% 
+    dplyr::rename(
       peptide_start = start_position, 
       peptide_end = end_position),
     categ2_pept_canannot,
@@ -515,6 +641,11 @@ final_annotated_df <- left_join(
     uniprot_processing_type = case_when(
       is.na(matches_p1_prime) ~ "not_canonical_no_procc_annot",
       TRUE ~ uniprot_processing_type
+    )
+  ) %>%
+  dplyr::select(
+    -c(
+      matches_p1_prime
     )
   ) %>%
   dplyr::relocate(
@@ -544,10 +675,15 @@ final_annotated_df <- left_join(
     p1_prime_residue,
     p1_position_percentage,
     met_clipping,
-    matches_p1_prime,
     uniprot_processing_type,
     processing_annotation_start,
     processing_annotation_end,
+    # include both ID and name-based annotations
+    protease_merops_ids,
+    protease_merops_names,
+    predicted_protease_activity_ids,
+    predicted_protease_activity_names,
+    predicted_protease_activity,
     protein_sequence
   )
 
