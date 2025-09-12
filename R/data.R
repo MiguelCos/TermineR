@@ -260,3 +260,19 @@
 #'
 #' @source Derived from \code{merops_sites}. Built by \code{scr/merops_build.R}.
 "merops_pssm"
+#' MEROPS protease ID to name mapping
+#'
+#' Two-column lookup mapping MEROPS internal protease identifiers to human-readable protease names.
+#'
+#' @format A data frame with:
+#' \describe{
+#'   \item{merops_protease_id}{MEROPS protease identifier (e.g., C14.003)}
+#'   \item{protease_name}{Protease name}
+#' }
+#'
+#' @details
+#' Derived from the MEROPS uniprot.txt mapping file and deduplicated.
+#'
+#' @source MEROPS database, current_release/database_files/uniprot.txt;
+#'   ftp://ftp.ebi.ac.uk/pub/databases/merops/current_release/database_files/ (accessed September 2025).
+"merops_accession_to_protease"

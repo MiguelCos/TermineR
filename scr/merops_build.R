@@ -8,15 +8,18 @@ library(usethis)
 ftp_dir <- "ftp://ftp.ebi.ac.uk/pub/databases/merops/current_release/database_files/"
 fn_substrates <- file.path(ftp_dir, "substrate.txt")
 fn_cleavage   <- file.path(ftp_dir, "cleavage.txt")           # name may be substrate_cut_sites in some releases
+fn_accession_map <- file.path(ftp_dir, "uniprot.txt")  
 
 # Local temp
 td <- tempdir()
 f_substrates <- file.path(td, "substrates.txt")
 f_cleavage   <- file.path(td, "cleavage.txt")
+f_accession_map <- file.path(td, "uniprot.txt")  
 
 # ---------- 1) Download (FTP, anonymous) ----------
 curl::curl_download(fn_substrates, f_substrates, mode = "wb")
 curl::curl_download(fn_cleavage,   f_cleavage,   mode = "wb")
+curl::curl_download(fn_accession_map, f_accession_map, mode = "wb")  
 
 # ---------- 2) Read ----------
 substrates <- read.delim(f_substrates, header = FALSE, quote = "\"",
@@ -28,6 +31,7 @@ colnames(substrates) <- c("uniprot_acc", "sequence", "merops_substrate_id",
 cleavage <- read.delim(f_cleavage, header = FALSE, quote = "\"",
                        na.strings = "\\N", stringsAsFactors = FALSE)
 
+
 # Column names are stable-ish but MEROPS exports vary slightly across releases.
 # This covers the common layout you pasted:
 colnames(cleavage) <- c("protease_id", "substrate_key", "position",
@@ -36,6 +40,16 @@ colnames(cleavage) <- c("protease_id", "substrate_key", "position",
                         "region_tested", "notes", "reference", "method", "comments")
 
 cleavage$position <- suppressWarnings(as.integer(cleavage$position))
+
+accession_map <- read.csv(f_accession_map, header = FALSE, quote = "\"", sep = ",",
+                           na.strings = "\\N", stringsAsFactors = FALSE)
+
+colnames(accession_map) <- c("protease_family", "protease_id", "protease_name", "organism", "uniprot_acc")
+
+merops_accession_to_protease <- accession_map %>%
+  dplyr::select(protease_id, protease_name) %>%
+  distinct()
+
 
 # ---------- 3) Join cleavage -> sequence ----------
 # Try MEROPS internal substrate id first; if NA, try UniProt accession
@@ -252,4 +266,4 @@ merops_pssm$pssm <- lapply(merops_pssm$pssm, function(m) {
 })
 
 # ---------- 6) Save in package ----------
-usethis::use_data(merops_sites, merops_pssm, overwrite = TRUE)
+usethis::use_data(merops_sites, merops_pssm, merops_accession_to_protease, overwrite = TRUE)
