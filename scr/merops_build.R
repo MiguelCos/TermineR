@@ -64,10 +64,10 @@ extract_window8 <- function(
   # MEROPS convention: cleavage is between P1 (pos-1) and P1' (pos)
   # pos is the index of P1' in the protein sequence (1-based)
 
-  start <- max(1, pos - flank)
-  end   <- min(nchar(seq), pos + (flank - 1))
-  
-  w <- substr(seq, start, end)
+  start <- max(1, pos - (flank - 1))
+  end   <- min(nchar(seq), pos + flank)
+
+  w <- stringr::str_sub(seq, start, end)
   
   # Pad with X to length 8 (if near ends)
 
@@ -77,7 +77,7 @@ extract_window8 <- function(
   # Uppercase, non-standard letters to X
   w <- toupper(w)
   w <- chartr("BJOUZ*", "XXXXXX", w)
-  w
+  w <- stringr::str_pad(w, 8, side = "both", pad = "X")
 }
 
 merops_sites <- cleav_seq %>%
@@ -100,13 +100,26 @@ merops_sites <- cleav_seq %>%
 # global background from all windows (AA frequency across all positions)
 bg_from_windows <- function(windows) {
 
-  vec <- strsplit(paste(windows, collapse = ""), "")[[1]]
+  if (length(windows) == 0L) {
+    warning("bg_from_windows: windows is empty; returning uniform background.")
+    bg <- rep(1/length(AA20), length(AA20))
+    names(bg) <- AA20
+    return(bg)
+  }
 
+  vec <- strsplit(paste(windows, collapse = ""), "", fixed = TRUE)[[1]]
   vec <- vec[vec %in% AA20]
-
   tab <- table(factor(vec, levels = AA20))
+  total <- sum(tab)
 
-  as.numeric(tab) / sum(tab)
+  bg <- if (total == 0L) {
+    warning("bg_from_windows: no AA20 letters found; returning uniform background.")
+    rep(1/length(AA20), length(AA20))
+  } else {
+    as.numeric(tab) / total
+  }
+  names(bg) <- AA20
+  bg
 }
 
 global_bg <- bg_from_windows(merops_sites$window8)
@@ -155,11 +168,28 @@ make_blosum_prior <- function() {
 
 PRI <- tryCatch(make_blosum_prior(), error = function(e) NULL)
 
-count_pos_matrix <- function(windows) {
+if (!is.null(PRI)) {
+  # Ensure PRI has AA20 dimnames
+  if (is.null(rownames(PRI)) || is.null(colnames(PRI))) {
+    dimnames(PRI) <- list(AA20, AA20)
+  }
+}
 
-  mats <- lapply(1:8, function(i) table(factor(substr(windows, i, i), levels = AA20)))
-  do.call(cbind, mats) # 20 x 8
-  
+count_pos_matrix <- function(windows, AA = AA20) {
+  # counts per AA (rows) and position (cols)
+  if (is.null(AA) || length(AA) != 20L) {
+    stop("AA20 is missing or has wrong length; expected 20 amino acids.")
+  }
+  mats <- lapply(1:8, function(i) {
+    aa_i <- substr(windows, i, i)
+    idx  <- match(aa_i, AA)                      # 1..20 or NA
+    tabulate(idx, nbins = length(AA))            # length-20, zeros for NA
+  })
+  m <- do.call(cbind, mats)                      # 20 x 8
+  rownames(m) <- AA
+  colnames(m) <- c("P4","P3","P2","P1","P1'","P2'","P3'","P4'")
+  storage.mode(m) <- "double"
+  m
 }
 
 make_pssm <- function(
@@ -170,28 +200,30 @@ make_pssm <- function(
 
   if (!length(windows)) return(NULL)
 
-  counts <- count_pos_matrix(windows) # 20x8
+  counts <- count_pos_matrix(windows, AA20)      # 20 x 8
+  # Ensure bg matches AA20 order
+  bg <- unname(as.numeric(bg[AA20]))
 
   if (use_blosum_prior && !is.null(PRI)) {
-
-    # position-wise data-adaptive prior by mixing BLOSUM62 rows weighted by observed column frequencies
-    counts_pc <- vapply(1:8, function(j) {
-
-      col <- counts[, j, drop = FALSE]
-      tot <- sum(col)
-      w   <- if (tot > 0) as.numeric(col) / tot else rep(1/20, 20)
-      # prior for the column = PRI %*% w
-      prior_col <- PRI %*% w
-      as.numeric(col + pc * prior_col)
-
-    }, numeric(20))
+    # Make sure PRI matches AA20
+    if (!identical(rownames(PRI), AA20) || !identical(colnames(PRI), AA20)) {
+      PRI <- PRI[AA20, AA20, drop = FALSE]
+    }
+    counts_pc <- vapply(seq_len(ncol(counts)), function(j) {
+      col_vec <- as.numeric(counts[, j])                 # length 20
+      tot <- sum(col_vec)
+      w   <- if (tot > 0) col_vec / tot else rep(1/20, 20)
+      prior_col <- as.vector(PRI %*% w)                  # length 20
+      col_vec + pc * prior_col                           # length 20
+    }, numeric(length(AA20)))
   } else {
     counts_pc <- counts + pc
   }
 
-  probs <- sweep(counts_pc, 2, colSums(counts_pc), "/")     # 20 x 8
-  odds  <- sweep(probs, 1, bg, "/")                         # divide by background
-  log2(odds)                                                # 20 x 8
+  # Normalize to probabilities by column, then to log2 odds vs background
+  probs <- sweep(counts_pc, 2, colSums(counts_pc), "/")  # 20 x 8
+  odds  <- sweep(probs, 1, bg, "/")                      # divide by background
+  log2(odds)                                             # 20 x 8
 }
 
 protease_windows <- merops_sites %>%
@@ -209,6 +241,15 @@ merops_pssm <- protease_windows %>%
   dplyr::select(-windows) %>%
   filter(!purrr::map_lgl(pssm, is.null))
 
+AA20 <- c("A","R","N","D","C","E","Q","G","H","I","L","K","M","F","P","S","T","W","Y","V")
+pos8 <- c("P4","P3","P2","P1","P1'","P2'","P3'","P4'")
+
+merops_pssm$pssm <- lapply(merops_pssm$pssm, function(m) {
+  m <- as.matrix(m)
+  if (is.null(rownames(m)) || length(rownames(m)) != 20) rownames(m) <- AA20
+  if (is.null(colnames(m)) || length(colnames(m)) != 8) colnames(m) <- pos8
+  m
+})
+
 # ---------- 6) Save in package ----------
 usethis::use_data(merops_sites, merops_pssm, overwrite = TRUE)
-
