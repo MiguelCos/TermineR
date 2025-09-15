@@ -45,6 +45,11 @@
 #'  \item{processing_annotation_end}{End position of the processing feature in the protein sequence}
 #'  \item{protein_sequence}{Protein sequence}
 #'  \item{sample_columns}{Scaled abundances of annotated features per sample}
+#'  \item{protease_merops_ids}{Pipe-separated MEROPS protease IDs matching the exact site (from MEROPS known sites)}
+#'  \item{protease_merops_names}{Pipe-separated human-readable names for the corresponding MEROPS IDs; falls back to ID if name is unavailable}
+#'  \item{predicted_protease_activity_ids}{Top-N predicted proteases scored by PSSM on the window8 sequence, as pipe-separated "ID:score" pairs (score in log2 odds)}
+#'  \item{predicted_protease_activity_names}{Same as above but using protease names; falls back to ID when name is unavailable}
+#'  \item{predicted_protease_activity}{Backward-compatible alias of predicted_protease_activity_names}
 #' }
 #'
 #' @importFrom dplyr select distinct mutate filter left_join arrange group_by summarize ungroup relocate
