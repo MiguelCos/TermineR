@@ -648,11 +648,6 @@ final_annotated_df <- left_join(
       TRUE ~ uniprot_processing_type
     )
   ) %>%
-  dplyr::select(
-    -c(
-      matches_p1_prime
-    )
-  ) %>%
   dplyr::relocate(
     nterm_modif_peptide,
     nterm_modif,
@@ -683,6 +678,7 @@ final_annotated_df <- left_join(
     uniprot_processing_type,
     processing_annotation_start,
     processing_annotation_end,
+    matches_p1_prime,
     # include both ID and name-based annotations
     protease_merops_ids,
     protease_merops_names,
