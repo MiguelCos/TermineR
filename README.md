@@ -2,11 +2,22 @@
 from shotgun proteomics data.
 
 
+- [TermineR: extracting information on endogenous proteolytic processing](#terminer-extracting-information-on-endogenous-proteolytic-processing)
 - [Installation](#installation)
   - [Requisites](#requisites)
+    - [Rtools](#rtools)
+    - [devtools](#devtools)
+    - [BiocManager](#biocmanager)
+    - [Required packages for the terminomics analysis workflow](#required-packages-for-the-terminomics-analysis-workflow)
 - [Usage at a glance](#usage-at-a-glance)
   - [Adapter functions](#adapter-functions)
+    - [FragPipe adapter](#fragpipe-adapter)
+    - [DiaNN adapter](#diann-adapter)
+    - [Spectronaut adapter](#spectronaut-adapter)
+    - [Fragpipe label-free adapter](#fragpipe-label-free-adapter)
+    - [FragPipe label-free with isotopic labelling on MS1 level (i.e., heavy/light dimethyl)](#fragpipe-label-free-with-isotopic-labelling-on-ms1-level-ie-heavylight-dimethyl)
   - [Peptide annotation](#peptide-annotation)
+    - [Annotation output description](#annotation-output-description)
   - [Visualization of cleavage sites](#visualization-of-cleavage-sites)
   - [Differential abundance analysis](#differential-abundance-analysis)
 - [Minimal example](#minimal-example)
@@ -299,7 +310,7 @@ processed by the adapter functions with information on proteolytic
 specificity, cleavage sites/sequences, and mapping to known processing
 events as described in the by Uniprot “Protein Processing” features.
 
-The basic usage of the `annotate_peptides` function is as follows:
+The basic usage of the `annotate_neo_termini` function is as follows:
 
 ``` r
 annotate_neo_termini(
@@ -331,7 +342,47 @@ Where:
   `"mendicato_trucantula"` and `"rhizobium_melitoli"`, `"pig"`, `"arabidopsis"`, `"ecoli"`, `"rat"`, `"yeast"` and `"c_elegans"` are
   supported. Other organisms available in Uniprot can be included upon
   request.
-  
+
+### Annotation output description
+
+The output of the `annotate_neo_termini` function is a data frame with the
+following columns:
+
+- `nterm_modif_peptide`: Peptide identification merging N-terminal modification + peptide sequence
+- `nterm_modif`: N-terminal modification
+- `peptide`: Peptide sequence
+- `protein`: Protein ID based on UniProt accession
+- `protein_length`: Protein length
+- `peptide_start`: Start position of the peptide in the protein sequence
+- `peptide_end`: End position of the peptide in the protein sequence
+- `last_aa`: Last amino acid of the peptide
+- `first_aa`: First amino acid of the peptide
+- `aa_after`: Amino acid after the peptide
+- `aa_before`: Amino acid before the peptide
+- `sense`: Direction of the peptide cleavage ("C" means after C-termini, like trypsin)
+- `specificity`: Specificity of the cleavage sites of the peptide ("specific", "semi_Nterm", or "semi_Cterm")
+- `five_res_before`: Five amino acids before the cleavage site
+- `five_res_after`: Five amino acids after the cleavage site
+- `cleavage_site`: Five amino acids before and after the cleavage site, separated by "|"
+- `cleavage_sequence`: Ten amino acids around the cleavage site
+- `p1_position`: Position of the P1 residue around the cleavage site
+- `p1_prime_position`: Position of the P1' residue around the cleavage site
+- `p1_residue`: P1 residue (amino acid)
+- `p1_prime_residue`: P1' residue (amino acid)
+- `p1_position_percentage`: Position of the P1 residue as a percentage of the protein length
+- `met_clipping`: Logical; TRUE if the peptide is a methionine clipping
+- `matches_p1_prime`: Logical; TRUE if the peptide matches the P1' position of a processing feature
+- `uniprot_processing_type`: Type of processing feature from UniProt API (one of INIT_MET, PROPEP, SIGNAL, TRANSIT, CHAIN; "non_canonical" indicates the potential cleavage location has not been annotated in UniProt processing features; "not_canonical_no_procc_annot" indicates the protein lacks processing features information)
+- `processing_annotation_start`: Start position of the processing feature in the protein sequence
+- `processing_annotation_end`: End position of the processing feature in the protein sequence
+- `protein_sequence`: Protein sequence
+- `sample_columns`: Scaled abundances of annotated features per sample
+- `protease_merops_ids`: Pipe-separated MEROPS protease IDs matching the exact site (from MEROPS known sites)
+- `protease_merops_names`: Pipe-separated human-readable names corresponding to the MEROPS IDs; falls back to ID if name is unavailable
+- `predicted_protease_activity_ids`: Top-N predicted proteases scored by PSSM on the window8 sequence, as pipe-separated "ID:score" pairs (score in log2 odds)
+- `predicted_protease_activity_names`: Same as above but using protease names; falls back to ID when name is unavailable
+- `predicted_protease_activity`: Backward-compatible alias of `predicted_protease_activity_names`
+
 ## Visualization of cleavage sites
 
 After identifying a set of peptides or cleavage events of interest
@@ -605,4 +656,4 @@ sessionInfo()
     [40] glue_1.6.2          Rcpp_1.0.11         xfun_0.41          
     [43] tidyselect_1.2.0    rstudioapi_0.15.0   knitr_1.45         
     [46] farver_2.1.1        htmltools_0.5.7     labeling_0.4.3     
-    [49] rmarkdown_2.25      diann_1.0.1         compiler_4.4.0     
+    [49] rmarkdown_2.25      diann_1.0.1         compiler_4.4.0
