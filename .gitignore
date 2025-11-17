@@ -9,6 +9,10 @@ TermineR.Rproj
 /manuscript_figures/
 /revision/
 /scr/check_modifications_structure_diann_output.R
+/scr/merops_build.R
+/scr/tests_merops.R
+/scr/tests.R
+/scr/prepare_uniprot_tis_annotations.R
 
 percentage_of_nterm_tryptic.qmd
 README.qmd

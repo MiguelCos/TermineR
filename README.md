@@ -92,7 +92,7 @@ workflow:
 
 Notice that some of these packages are not available in the CRAN
 repository and need to be installed from Bioconductor or via `devtools`
-from Github (such as the `TermineR`package). You can install them by
+from Github (such as the `TermineR` package). You can install them by
 running the following commands:
 
 ``` r
