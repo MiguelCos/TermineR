@@ -804,7 +804,8 @@ diann_adapter <- function(
               unimod_id_to_name_mapping) %>%
     mutate(
       nterm_modif = case_when(
-        is.na(name) ~ "n",
+        is.na(name) & !str_detect(first_modif, "89.030[0-9]") ~ "n",
+        is.na(name) & str_detect(first_modif, "89.030[0-9]") & first_modif_locat == 1 ~ "2PCA",
         first_modif_locat == 1 & !is.na(name) ~ name,
         first_modif_locat != 1 & !is.na(name) ~ "n"
       )
