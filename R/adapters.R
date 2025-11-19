@@ -405,6 +405,10 @@ fragpipe_adapter <- function(parent_dir,
     psm_file_path <- list.files(folders_dir,
                                 pattern = "psm.tsv",
                                 full.names = TRUE)
+                                  
+    intern_foldrs <- dirname(psm_file_path)
+
+    intern_foldrs <- basename(intern_foldrs)
 
   } else {
 
@@ -1016,6 +1020,10 @@ if(!any(str_detect(list.files(parent_dir), "psm.tsv"))){
   psm_file_path <- list.files(folders_dir,
                               pattern = "psm.tsv",
                               full.names = TRUE)
+  
+  intern_foldrs <- dirname(psm_file_path)
+
+  intern_foldrs <- basename(intern_foldrs)
 
 } else {
 
