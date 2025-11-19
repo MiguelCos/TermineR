@@ -126,7 +126,9 @@ fragpipe_adapter <- function(parent_dir,
         str_detect(`Assigned Modifications`, "N-term\\(42.010[0-9]\\)") ~ "Acetyl",
         str_detect(`Assigned Modifications`, "N-term\\(28.031[0-9]\\)") ~ "Dimethyl",
         str_detect(`Assigned Modifications`, "N-term\\(36.075[0-9]\\)") ~ "Dimethyl",
-        str_detect(`Assigned Modifications`, "N-term\\(89.030[0-9]\\)") ~ "2PCA",        
+        str_detect(`Assigned Modifications`, "N-term\\(89.030[0-9]\\)") ~ "2PCA",
+        str_detect(`Assigned Modifications`, "Q\\(\\-17.026[0-9]\\)") ~ "Pyro-Glu",
+        str_detect(`Assigned Modifications`, "E\\(\\-18.010[0-9]\\)") ~ "Pyro-Glu",
         TRUE ~ "n"
         )
       ) %>%
@@ -1071,6 +1073,8 @@ psm_tsv_sel <- psm_tsv %>%
         str_detect(`Assigned Modifications`, "N-term\\(34.063[0-9]\\)") ~ "Dimethyl",
         str_detect(`Assigned Modifications`, "N-term\\(7.947[0-9]\\)") ~ "Acetyl", # when dimethyl 34 is set as fixed N-term modif
         str_detect(`Assigned Modifications`, "N-term\\(89.030[0-9]\\)") ~ "2PCA",
+        str_detect(`Assigned Modifications`, "Q\\(\\-17.026[0-9]\\)") ~ "Pyro-Glu",
+        str_detect(`Assigned Modifications`, "E\\(\\-18.010[0-9]\\)") ~ "Pyro-Glu",
         TRUE ~ "n"
       )
     ) %>%
@@ -1190,6 +1194,8 @@ fragpipe_dda_heavy_light_adapter <- function(
         str_detect(modified_peptide, "n\\[42.010[0-9]\\]", negate = TRUE) &
           (str_detect(light_modified_peptide, "n\\[28.031[0-9]\\]") |
              str_detect(heavy_modified_peptide, "n\\[34.063[0-9]\\]")) ~ "Dimethyl",
+        str_detect(`Assigned Modifications`, "Q\\(\\-17.026[0-9]\\)") ~ "Pyro-Glu",
+        str_detect(`Assigned Modifications`, "E\\(\\-18.010[0-9]\\)") ~ "Pyro-Glu",
         TRUE ~ "n"
       ),
       peptide = peptide_sequence,
