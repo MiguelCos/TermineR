@@ -122,10 +122,23 @@ merops_score_window <- function(
     "(?<=\\|)(.*?)(?=\\|)"
     )
 
-  fasta_df <- tibble(
-        protein = fasta_names,
-        protein_sequence = unlist(fasta_2)
+  # Build FASTA data frame, first validate no duplicate accessions
+  dup_acc <- fasta_names[duplicated(fasta_names)]
+  
+  if (length(dup_acc) > 0) {
+    stop(
+      paste0(
+        "annotate_neo_termini: duplicated FASTA accession(s) detected: ",
+        paste(sort(unique(dup_acc)), collapse = ", "),
+        ". Please remove duplicates from '", fasta_location, "' before continuing."
+      )
     )
+  }
+
+  fasta_df <- tibble(
+    protein = fasta_names,
+    protein_sequence = unlist(fasta_2)
+  )
   
   expected_modifications <- c("TMT",
                               "Dimethyl",
