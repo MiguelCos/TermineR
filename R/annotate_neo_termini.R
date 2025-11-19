@@ -130,6 +130,7 @@ merops_score_window <- function(
   expected_modifications <- c("TMT",
                               "Dimethyl",
                               "Acetyl",
+                              "2PCA",
                               str_subset(unimod_id_to_name_mapping$name,
                                          "Dimethyl"),
                               str_subset(unimod_id_to_name_mapping$name,
