@@ -405,12 +405,6 @@ fragpipe_adapter <- function(parent_dir,
     psm_file_path <- list.files(folders_dir,
                                 pattern = "psm.tsv",
                                 full.names = TRUE)
-  
-    # exclude from folders_dir those without psm.tsv file
-
-  folders_dir <- folders_dir[psm_file_path %in% psm_file_path]
-
-    psm_file_path <- paste0(folders_dir, "/psm.tsv")
 
   } else {
 
@@ -1022,12 +1016,6 @@ if(!any(str_detect(list.files(parent_dir), "psm.tsv"))){
   psm_file_path <- list.files(folders_dir,
                               pattern = "psm.tsv",
                               full.names = TRUE)
-
-  # exclude from folders_dir those without psm.tsv file
-
-  folders_dir <- folders_dir[psm_file_path %in% psm_file_path]
-
-  psm_file_path <- paste0(folders_dir, "/psm.tsv")
 
 } else {
 
