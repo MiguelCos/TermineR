@@ -400,9 +400,15 @@ fragpipe_adapter <- function(parent_dir,
                              full.names = TRUE,
                              recursive = FALSE)
 
-    intern_foldrs <- list.dirs(parent_dir,
-                               full.names = FALSE,
-                               recursive = FALSE)
+    # check for psm.tsv files in each folder
+
+    psm_file_path <- list.files(folders_dir,
+                                pattern = "psm.tsv",
+                                full.names = TRUE)
+  
+    # exclude from folders_dir those without psm.tsv file
+
+  folders_dir <- folders_dir[psm_file_path %in% psm_file_path]
 
     psm_file_path <- paste0(folders_dir, "/psm.tsv")
 
@@ -1010,9 +1016,17 @@ if(!any(str_detect(list.files(parent_dir), "psm.tsv"))){
   folders_dir <- list.dirs(parent_dir,
                            full.names = TRUE,
                            recursive = FALSE)
-  intern_foldrs <- list.dirs(parent_dir,
-                             full.names = FALSE,
-                             recursive = FALSE)
+
+  # check for psm.tsv files in each folder
+
+  psm_file_path <- list.files(folders_dir,
+                              pattern = "psm.tsv",
+                              full.names = TRUE)
+
+  # exclude from folders_dir those without psm.tsv file
+
+  folders_dir <- folders_dir[psm_file_path %in% psm_file_path]
+
   psm_file_path <- paste0(folders_dir, "/psm.tsv")
 
 } else {
@@ -1043,6 +1057,7 @@ annotation_txt <- read_tsv(annotation_file_path) %>%
 
 psm_tsv_sel <- psm_tsv %>%
     dplyr::select(all_of(interest_cols)) %>%
+    mutate(run = stringr::str_replace_all(`Spectrum File`, "\\\\", "/")) %>%
     mutate(run = basename(`Spectrum File`)) %>%
     mutate(run = str_remove(run, ".pep.xml")) %>%
     mutate(run = str_remove(run, "interact-")) %>%
