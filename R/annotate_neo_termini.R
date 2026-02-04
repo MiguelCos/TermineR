@@ -531,9 +531,9 @@ categ2_pept_canannot <- bind_rows(pept_wmatch,
     # adjust the definition of INIT_MET based on M at P1
     mutate(
       processing_type = case_when(
-        processing_type == "not_canonical" & p1_residue == "M" & peptide_start == 2 ~ "INIT_MET_not_canonical",
+        processing_type == "not_canonical" & p1_residue == "M" & p1_position < 3 ~ "INIT_MET_not_canonical",
         processing_type == "not_canonical" & p1_prime_position == 1 ~ "Intact_ORF",
-        processing_type == "not_canonical_no_procc_annot" & p1_residue == "M" & peptide_start == 2 ~ "INIT_MET_not_canonical",
+        processing_type == "not_canonical_no_procc_annot" & p1_residue == "M" & p1_position < 3 ~ "INIT_MET_not_canonical",
         processing_type == "not_canonical_no_procc_annot" & p1_prime_position == 1 ~ "Intact_ORF",
         TRUE ~ processing_type
       ),
