@@ -11,7 +11,10 @@ annotate_neo_termini(
   specificity,
   organism,
   n_residues_area = 10,
-  distinct = TRUE
+  distinct = TRUE,
+  pssm_prediction = TRUE,
+  pssm_protease_ids = NULL,
+  pssm_top_n = 5
 )
 }
 \arguments{
@@ -28,6 +31,12 @@ annotate_neo_termini(
 \item{n_residues_area}{number of residues to consider around the cleavage area. Default is 10. Example: if n_residues_area = 10, the cleavagea are would be 10 residues before and 10 residues after the cleavage site.}
 
 \item{distinct}{logical. If TRUE, keep only one peptide sequence per feature. Default is TRUE.}
+
+\item{pssm_prediction}{logical. If TRUE (default), compute PSSM-based protease activity predictions from MEROPS.}
+
+\item{pssm_protease_ids}{optional character vector of MEROPS protease IDs used as candidates for PSSM scoring. If NULL (default), all available MEROPS proteases are considered.}
+
+\item{pssm_top_n}{positive integer. Number of top-scoring proteases to keep per cleavage sequence when PSSM prediction is enabled. Default is 5.}
 }
 \value{
 A data frame with at least 28 columns
@@ -68,8 +77,8 @@ maps to a Uniprot protein ID that does not have processing features information.
 \item{sample_columns}{Scaled abundances of annotated features per sample}
 \item{protease_merops_ids}{Pipe-separated MEROPS protease IDs matching the exact site (from MEROPS known sites)}
 \item{protease_merops_names}{Pipe-separated human-readable names for the corresponding MEROPS IDs; falls back to ID if name is unavailable}
-\item{predicted_protease_activity_ids}{Top-N predicted proteases scored by PSSM on the window8 sequence, as pipe-separated "ID:score" pairs (score in log2 odds)}
-\item{predicted_protease_activity_names}{Same as above but using protease names; falls back to ID when name is unavailable}
+\item{predicted_protease_activity_ids}{Top-N predicted proteases scored by PSSM on the window8 sequence, as pipe-separated "ID:score" pairs (score in log2 odds). Empty strings when pssm_prediction = FALSE or when no candidate proteases are available after filtering.}
+\item{predicted_protease_activity_names}{Same as above but using protease names; falls back to ID when name is unavailable. Empty strings when pssm_prediction = FALSE or when no candidate proteases are available after filtering.}
 \item{predicted_protease_activity}{Backward-compatible alias of predicted_protease_activity_names}
 }
 }
