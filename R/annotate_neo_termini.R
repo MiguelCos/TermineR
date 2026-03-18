@@ -8,6 +8,9 @@
 #' @param organism organism of the fasta file. Default is "mouse". Other options are "human", "medicago_trucantula", "rhizobium_melitoli", "pig", "human_iso", "ecoli", "arabidopsis", "rat", "yeast", and "c_elegans".
 #' @param distinct logical. If TRUE, keep only one peptide sequence per feature. Default is TRUE.
 #' @param n_residues_area number of residues to consider around the cleavage area. Default is 10. Example: if n_residues_area = 10, the cleavagea are would be 10 residues before and 10 residues after the cleavage site.
+#' @param pssm_prediction logical. If TRUE (default), compute PSSM-based protease activity predictions from MEROPS.
+#' @param pssm_protease_ids optional character vector of MEROPS protease IDs used as candidates for PSSM scoring. If NULL (default), all available MEROPS proteases are considered.
+#' @param pssm_top_n positive integer. Number of top-scoring proteases to keep per cleavage sequence when PSSM prediction is enabled. Default is 5.
 #'
 #' @return A data frame with at least 28 columns
 #' \describe{
@@ -47,8 +50,8 @@
 #'  \item{sample_columns}{Scaled abundances of annotated features per sample}
 #'  \item{protease_merops_ids}{Pipe-separated MEROPS protease IDs matching the exact site (from MEROPS known sites)}
 #'  \item{protease_merops_names}{Pipe-separated human-readable names for the corresponding MEROPS IDs; falls back to ID if name is unavailable}
-#'  \item{predicted_protease_activity_ids}{Top-N predicted proteases scored by PSSM on the window8 sequence, as pipe-separated "ID:score" pairs (score in log2 odds)}
-#'  \item{predicted_protease_activity_names}{Same as above but using protease names; falls back to ID when name is unavailable}
+#'  \item{predicted_protease_activity_ids}{Top-N predicted proteases scored by PSSM on the window8 sequence, as pipe-separated "ID:score" pairs (score in log2 odds). Empty strings when pssm_prediction = FALSE or when no candidate proteases are available after filtering.}
+#'  \item{predicted_protease_activity_names}{Same as above but using protease names; falls back to ID when name is unavailable. Empty strings when pssm_prediction = FALSE or when no candidate proteases are available after filtering.}
 #'  \item{predicted_protease_activity}{Backward-compatible alias of predicted_protease_activity_names}
 #' }
 #'
@@ -74,7 +77,10 @@ annotate_neo_termini <- function(
   specificity,
   organism,
   n_residues_area = 10, # number of residues to consider around the cleavage area (n before and n after)
-  distinct = TRUE){
+  distinct = TRUE,
+  pssm_prediction = TRUE,
+  pssm_protease_ids = NULL,
+  pssm_top_n = 5){
 
   require(dplyr)
   require(stringr)
@@ -82,6 +88,20 @@ annotate_neo_termini <- function(
   require(purrr)
   require(tidyr)
   require(magrittr)
+
+  if (!is.logical(pssm_prediction) || length(pssm_prediction) != 1) {
+    stop("'pssm_prediction' must be a single logical value (TRUE/FALSE).")
+  }
+
+  if (!is.null(pssm_protease_ids) && !is.character(pssm_protease_ids)) {
+    stop("'pssm_protease_ids' must be NULL or a character vector of MEROPS protease IDs.")
+  }
+
+  if (!is.numeric(pssm_top_n) || length(pssm_top_n) != 1 || is.na(pssm_top_n) || pssm_top_n < 1) {
+    stop("'pssm_top_n' must be a single numeric/integer value >= 1.")
+  }
+
+  pssm_top_n <- as.integer(pssm_top_n)
   
   data("unimod_id_to_name_mapping", package = "TermineR")
   data("merops_sites", package = "TermineR")
@@ -595,47 +615,66 @@ categ2_pept_canannot <- categ2_pept_canannot %>%
 
 # Predicted protease activity via PSSM (sum log2 odds across P4…P4')
 #    Keep top N for compactness.
-top_n <- 5
 pssm_tbl <- merops_pssm %>%
   dplyr::select(protease_id, pssm)
 
+if (!is.null(pssm_protease_ids)) {
+  pssm_tbl <- pssm_tbl %>%
+    dplyr::filter(protease_id %in% pssm_protease_ids)
+}
+
 score_one <- function(w) {
-  if (is.na(w) || nchar(w) != 8) return(tibble(protease_id = character(), score = numeric()))
+  if (
+    is.na(w) ||
+    nchar(w) != 8 ||
+    nrow(pssm_tbl) == 0
+  ) {
+    return(tibble(protease_id = character(), score = numeric()))
+  }
+
   tibble(
     protease_id = pssm_tbl$protease_id,
     score = purrr::map_dbl(pssm_tbl$pssm, ~ merops_score_window(w, .x))
   ) %>%
   arrange(desc(score)) %>%
-  slice_head(n = top_n)
+  slice_head(n = pssm_top_n)
 }
 
-pred_scored <- categ2_pept_canannot %>%
-  dplyr::select(cleavage_sequence) %>%
-  distinct() %>%
-  mutate(pred_tbl = purrr::map(
-    cleavage_sequence,
-    score_one
-  )) %>%
-  tidyr::unnest(pred_tbl) %>%
-  # attach names for each protease_id
-  left_join(
-    merops_accession_to_protease,
-    by = c("protease_id" = "protease_id")
-  ) %>%
-  group_by(cleavage_sequence) %>%
-  summarise(
-    predicted_protease_activity_ids   = paste0(
-      protease_id, ":",
-      formatC(score, format = "f", digits = 3),
-      collapse = "|"
-    ),
-    predicted_protease_activity_names = paste0(
-      coalesce(protease_name, protease_id), ":",
-      formatC(score, format = "f", digits = 3),
-      collapse = "|"
-    ),
-    .groups = "drop"
+if (isTRUE(pssm_prediction) && nrow(pssm_tbl) > 0) {
+  pred_scored <- categ2_pept_canannot %>%
+    dplyr::select(cleavage_sequence) %>%
+    distinct() %>%
+    mutate(pred_tbl = purrr::map(
+      cleavage_sequence,
+      score_one
+    )) %>%
+    tidyr::unnest(pred_tbl) %>%
+    # attach names for each protease_id
+    left_join(
+      merops_accession_to_protease,
+      by = c("protease_id" = "protease_id")
+    ) %>%
+    group_by(cleavage_sequence) %>%
+    summarise(
+      predicted_protease_activity_ids   = paste0(
+        protease_id, ":",
+        formatC(score, format = "f", digits = 3),
+        collapse = "|"
+      ),
+      predicted_protease_activity_names = paste0(
+        coalesce(protease_name, protease_id), ":",
+        formatC(score, format = "f", digits = 3),
+        collapse = "|"
+      ),
+      .groups = "drop"
+    )
+} else {
+  pred_scored <- tibble(
+    cleavage_sequence = character(),
+    predicted_protease_activity_ids = character(),
+    predicted_protease_activity_names = character()
   )
+}
 
 categ2_pept_canannot <- categ2_pept_canannot %>%
   left_join(pred_scored, by = "cleavage_sequence") %>%
