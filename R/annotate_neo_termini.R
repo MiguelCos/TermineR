@@ -5,7 +5,7 @@
 #' @param fasta_location location of the fasta file containing the protein sequences identified in the sample, in uniprot format.
 #' @param sense direction of the peptide cleavage. One of "N" or "C".
 #' @param specificity amino acid specificity of the cleavage site. Example: "K|R" for trypsin.
-#' @param organism organism of the fasta file. Default is "mouse". Other options are "human", "medicago_trucantula", "rhizobium_melitoli", "pig", "human_iso", "ecoli", "arabidopsis", "rat", "yeast", and "c_elegans".
+#' @param organism organism of the fasta file. Default is "mouse". Other options are "human", "medicago_trucantula", "rhizobium_melitoli", "pig", "human_iso", "ecoli", "arabidopsis", "rat", "yeast", "c_elegans", and "synechocystis".
 #' @param distinct logical. If TRUE, keep only one peptide sequence per feature. Default is TRUE.
 #' @param n_residues_area number of residues to consider around the cleavage area. Default is 10. Example: if n_residues_area = 10, the cleavagea are would be 10 residues before and 10 residues after the cleavage site.
 #' @param pssm_prediction logical. If TRUE (default), compute PSSM-based protease activity predictions from MEROPS.
@@ -385,7 +385,8 @@ expected_organisms <- c(
   "ecoli",
   "rat",
   "yeast",
-  "c_elegans"
+  "c_elegans",
+  "synechocystis"
 )
 
 if(organism == "mouse"){
@@ -453,6 +454,12 @@ if(organism == "mouse"){
   data("c_elegans_uniprot_processing", package = "TermineR")
     
   uniprot_processing <- c_elegans_uniprot_processing
+  
+  } else if(organism == "synechocystis"){
+  
+  data("synechocystis_uniprot_processing", package = "TermineR")
+    
+  uniprot_processing <- synechocystis_uniprot_processing
   
   } else if(organism %in% expected_organisms == FALSE){
     

@@ -220,6 +220,24 @@
 #' }
 #' @source Uniprot API (queried on December 2024)
 "c_elegans_uniprot_processing"
+#' @title Synechocystis sp. PCC 6803 protein processing annotation from Uniprot API
+#'
+#' @description Tabular annotation of processing information as obtained from Uniprot API
+#'   
+#' @format A data frame
+#' \describe{
+#'  \item{type}{Type of processing feature. One of SIGNAL, CHAIN, INIT_MET, TRANSIT, PEPTIDE}
+#'  \item{description}{Description of processing feature}
+#'  \item{begin}{begin of the processing feature in protein sequence}
+#'  \item{end}{end of the processing feature in protein sequence}
+#'  \item{length}{length of the processing feature within protein sequence}
+#'  \item{accession}{Uniprot accession ID associated with the feature}
+#'  \item{entryName}{Uniprot Entry name ID associated with the feature}
+#'  \item{taxid}{Organism tax id}
+#'  \item{order}{order}
+#' }
+#' @source Uniprot API (queried on May 2026)
+"synechocystis_uniprot_processing"
 #' MEROPS known protease cleavage sites and P4–P4' windows
 #'
 #' Tabular cleavage events joined to UniProt substrate sequences with P4…P4' windows.
