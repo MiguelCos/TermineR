@@ -15,7 +15,7 @@ spectronaut_adapter(path_to_file, proteotypic = TRUE)
 A data frame with at least 4 columns
 \describe{
 \item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
-\item{nterm_modif}{N-terminal modification. Only Acetyl annotation is available in the current version}
+\item{nterm_modif}{N-terminal modification}
 \item{peptide}{Peptide sequence}
 \item{protein}{Protein ID based on Uniprot Accession}
 }

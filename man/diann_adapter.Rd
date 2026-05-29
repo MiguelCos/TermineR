@@ -19,7 +19,7 @@ Default is "SUM".}
 A data frame with at least 4 columns
 \describe{
 \item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
-\item{nterm_modif}{N-terminal modification. Currently no N-terminal modification is supported for DIANN data}
+\item{nterm_modif}{N-terminal modification based on UniMod notation}
 \item{peptide}{Peptide sequence}
 \item{protein}{Protein ID based on Uniprot Accession}
 }

@@ -38,14 +38,21 @@
 #'  \item{p1_position_percentage}{Position of the P1 residue in proportion of the protein length}
 #'  \item{met_clipping}{Logical. TRUE if the peptide is a methionine clipping}
 #'  \item{matches_p1_prime}{Logical. TRUE if the peptide matches the P1' position of a processing feature}
-#'  \item{uniprot_processing_type}{Type of processing feature from Uniprot API. One of "INIT_MET", "PROPEP", 
-#'                                 "SIGNAL", "TRANSIT", "CHAIN". 
-#'                                 "non_canonical" indicates that the potential cleavage location 
+#'  \item{uniprot_processing_type}{Type of processing feature from Uniprot API. One of "INIT_MET", "PROPEP",
+#'                                 "SIGNAL", "TRANSIT", "CHAIN".
+#'                                 "non_canonical" indicates that the potential cleavage location
 #'                                 has not been annotated in UniProt processing features.
 #'                                 "not_canonical_no_procc_annot" indicates that the potential cleavage site
 #'                                 maps to a Uniprot protein ID that does not have processing features information.}
 #'  \item{processing_annotation_start}{Start position of the processing feature in the protein sequence}
 #'  \item{processing_annotation_end}{End position of the processing feature in the protein sequence}
+#'  \item{targetp_category}{TargetP prediction category, when available}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position, when available}
+#'  \item{targetp_matches_p1_prime}{Logical. TRUE if the peptide cleavage position matches the TargetP prediction}
+#'  \item{processing_type_targetp}{Processing type inferred from TargetP}
+#'  \item{processing_type_terminer}{Resolved processing annotation using TargetP when available, otherwise UniProt}
+#'  \item{processing_type}{Final processing-site classification}
+#'  \item{source_processing_annotation}{Annotation source supporting the final processing-site classification}
 #'  \item{protein_sequence}{Protein sequence}
 #'  \item{sample_columns}{Scaled abundances of annotated features per sample}
 #'  \item{protease_merops_ids}{Pipe-separated MEROPS protease IDs matching the exact site (from MEROPS known sites)}
@@ -102,13 +109,37 @@ annotate_neo_termini <- function(
   }
 
   pssm_top_n <- as.integer(pssm_top_n)
-  
+
+  expected_organisms <- c(
+    "mouse",
+    "human",
+    "medicago_trucantula",
+    "rhizobium_melitoli",
+    "pig",
+    "human_iso",
+    "arabidopsis",
+    "ecoli",
+    "rat",
+    "yeast",
+    "c_elegans",
+    "synechocystis"
+  )
+
+  if (!is.character(organism) || length(organism) != 1 || is.na(organism) ||
+      !organism %in% expected_organisms) {
+    stop(
+      "Organism not found in our list of annotations. Supported organisms are: ",
+      paste(expected_organisms, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
   data("unimod_id_to_name_mapping", package = "TermineR")
   data("merops_sites", package = "TermineR")
   data("merops_pssm",  package = "TermineR")
   data("merops_accession_to_protease", package = "TermineR")
 
-# helper functions 
+# helper functions
 
 # Score one window against one PSSM (20x8, log2 odds). Non-AA20 letters contribute 0.
 merops_score_window <- function(
@@ -123,7 +154,7 @@ merops_score_window <- function(
   idx <- match(aa, AA20)
 
   sum(vapply(seq_along(idx), function(i) if (is.na(idx[i])) 0 else pssm[idx[i], i], numeric(1)))
-  
+
 }
 
   peptide2protein <- peptides_df %>%
@@ -144,7 +175,7 @@ merops_score_window <- function(
 
   # Build FASTA data frame, first validate no duplicate accessions
   dup_acc <- fasta_names[duplicated(fasta_names)]
-  
+
   if (length(dup_acc) > 0) {
     stop(
       paste0(
@@ -159,15 +190,18 @@ merops_score_window <- function(
     protein = fasta_names,
     protein_sequence = unlist(fasta_2)
   )
-  
+
   expected_modifications <- c("TMT",
                               "Dimethyl",
                               "Acetyl",
+                              "Formyl",
                               "2PCA",
                               str_subset(unimod_id_to_name_mapping$name,
                                          "Dimethyl"),
                               str_subset(unimod_id_to_name_mapping$name,
                                          "Acetyl"),
+                              str_subset(unimod_id_to_name_mapping$name,
+                                         "Formyl"),
                               str_subset(unimod_id_to_name_mapping$name,
                                          "TMT"))
 
@@ -374,21 +408,6 @@ mol_processing_feat <- c(
   "CHAIN"
   )
 
-expected_organisms <- c(
-  "mouse",
-  "human",
-  "medicago_trucantula",
-  "rhizobium_melitoli",
-  "pig",
-  "human_iso",
-  "arabidopsis",
-  "ecoli",
-  "rat",
-  "yeast",
-  "c_elegans",
-  "synechocystis"
-)
-
 if(organism == "mouse"){
 
   data("mouse_uniprot_processing", package = "TermineR")
@@ -396,11 +415,11 @@ if(organism == "mouse"){
   uniprot_processing <- mouse_uniprot_processing
 
   } else if (organism == "human"){
-  
+
   data("human_uniprot_processing", package = "TermineR")
 
   uniprot_processing <- human_uniprot_processing
-  
+
   } else if(organism == "medicago_trucantula"){
 
   data("mendicato_trucantula_uniprot_processing", package = "TermineR")
@@ -420,53 +439,130 @@ if(organism == "mouse"){
   uniprot_processing <- pig_uniprot_processing
 
   } else if(organism == "human_iso"){
-    
+
   data("human_and_isoforms_uniprot_processing", package = "TermineR")
-    
+
   uniprot_processing <- human_and_isoforms_uniprot_processing
-  
+
   } else if(organism == "arabidopsis"){
-    
+
   data("arabidopsis_uniprot_processing", package = "TermineR")
-    
+
   uniprot_processing <- arabidopsis_uniprot_processing
-  
+
   } else if(organism == "ecoli"){
-    
+
   data("ecoli_uniprot_processing", package = "TermineR")
-    
+
   uniprot_processing <- ecoli_uniprot_processing
-  
+
   } else if(organism == "rat"){
-    
+
   data("rat_uniprot_processing", package = "TermineR")
 
   uniprot_processing <- rat_uniprot_processing
 
   } else if(organism == "yeast"){
-  
+
   data("yeast_uniprot_processing", package = "TermineR")
-    
+
   uniprot_processing <- yeast_uniprot_processing
-  
+
   } else if(organism == "c_elegans"){
-  
+
   data("c_elegans_uniprot_processing", package = "TermineR")
-    
+
   uniprot_processing <- c_elegans_uniprot_processing
-  
+
   } else if(organism == "synechocystis"){
-  
+
   data("synechocystis_uniprot_processing", package = "TermineR")
-    
+
   uniprot_processing <- synechocystis_uniprot_processing
-  
-  } else if(organism %in% expected_organisms == FALSE){
-    
-    stop("Organism not found in our list of annotations. Check documentation for list of supported organisms.")
-    
+
   }
- 
+
+targetp_processing <- NULL
+
+load_targetp_processing <- function(targetp_data_name){
+
+  targetp_env <- new.env(parent = emptyenv())
+
+  targetp_data <- try(
+    data(
+      list = targetp_data_name,
+      package = "TermineR",
+      envir = targetp_env
+    ),
+    silent = TRUE
+  )
+
+  if(inherits(targetp_data, "try-error") || !exists(targetp_data_name, envir = targetp_env)){
+
+    return(NULL)
+
+  }
+
+  get(targetp_data_name, envir = targetp_env)
+
+}
+
+if(organism == "mouse"){
+
+  targetp_processing <- load_targetp_processing("mouse_targetp_processing")
+
+  } else if(organism == "human"){
+
+  targetp_processing <- load_targetp_processing("human_targetp_processing")
+
+  } else if(organism == "arabidopsis"){
+
+  targetp_processing <- load_targetp_processing("arabidopsis_targetp_processing")
+
+  } else if(organism == "rat"){
+
+  targetp_processing <- load_targetp_processing("rat_targetp_processing")
+
+  } else if(organism == "yeast"){
+
+  targetp_processing <- load_targetp_processing("yeast_targetp_processing")
+
+  } else if(organism == "medicago_trucantula"){
+
+  targetp_processing <- load_targetp_processing("medicago_trucantula_targetp_processing")
+
+  } else if(organism == "rhizobium_melitoli"){
+
+  targetp_processing <- load_targetp_processing("rhizobium_melitoli_targetp_processing")
+
+  } else if(organism == "pig"){
+
+  targetp_processing <- load_targetp_processing("pig_targetp_processing")
+
+  } else if(organism == "human_iso"){
+
+  targetp_processing <- load_targetp_processing("human_iso_targetp_processing")
+
+  } else if(organism == "ecoli"){
+
+  targetp_processing <- load_targetp_processing("ecoli_targetp_processing")
+
+  } else if(organism == "c_elegans"){
+
+  targetp_processing <- load_targetp_processing("c_elegans_targetp_processing")
+
+  } else if(organism == "synechocystis"){
+
+  targetp_processing <- load_targetp_processing("synechocystis_targetp_processing")
+
+  }
+
+if(is.null(targetp_processing)){
+
+  message("TargetP processing annotation not available for ", organism, ". Reporting UniProt processing annotation only.")
+
+  }
+
 df_mol_proc_feat <- uniprot_processing %>%
   dplyr::filter(
     type %in% mol_processing_feat) %>% # keep only interesting features
@@ -569,7 +665,7 @@ categ2_pept_canannot <- bind_rows(pept_wmatch,
       peptide,
       protein,
       peptide_start,
-      p1_position,                      
+      p1_position,
       matches_p1_prime,
       cleavage_sequence,
       uniprot_processing_type = processing_type,
@@ -695,9 +791,9 @@ categ2_pept_canannot <- categ2_pept_canannot %>%
 # final annotated df (clean)
 
 final_annotated_df <- left_join(
-    annotated_df_w_quant %>% 
+    annotated_df_w_quant %>%
     dplyr::rename(
-      peptide_start = start_position, 
+      peptide_start = start_position,
       peptide_end = end_position),
     categ2_pept_canannot,
     relationship = "many-to-many"
@@ -706,6 +802,96 @@ final_annotated_df <- left_join(
     uniprot_processing_type = case_when(
       is.na(matches_p1_prime) ~ "not_canonical_no_procc_annot",
       TRUE ~ uniprot_processing_type
+    )
+  )
+
+if(!is.null(targetp_processing)){
+
+  final_annotated_df <- final_annotated_df %>%
+    left_join(
+      targetp_processing,
+      by = "protein"
+    ) %>%
+    mutate(
+      targetp_matches_p1_prime = case_when(
+        abs(as.numeric(p1_position) - targetp_p1_position) < 4 ~ TRUE,
+        TRUE ~ FALSE
+      )
+    ) %>%
+    mutate(
+      processing_type_targetp = case_when(
+        targetp_matches_p1_prime == TRUE & targetp_category == "SP" ~ "SIGNAL",
+        targetp_matches_p1_prime == TRUE & targetp_category == "mTP" ~ "mTP",
+        targetp_matches_p1_prime == TRUE & targetp_category == "cTP" ~ "cTP",
+        targetp_matches_p1_prime == TRUE & targetp_category == "luTP" ~ "luTP",
+        targetp_matches_p1_prime == FALSE ~ "not_canonical",
+        is.na(targetp_matches_p1_prime) ~ "not_canonical",
+        TRUE ~ "not_canonical"
+      )
+    ) %>%
+    mutate(
+      processing_type_terminer = dplyr::case_when(
+        processing_type_targetp != "not_canonical" ~ processing_type_targetp,
+        TRUE ~ dplyr::coalesce(uniprot_processing_type, "not_canonical_no_procc_annot")
+      )
+    ) %>%
+    mutate(
+      source_processing_annotation = case_when(
+        (uniprot_processing_type == processing_type_targetp) &
+          !(uniprot_processing_type %in% c("not_canonical", "not_canonical_no_procc_annot")) ~ "Both",
+        (uniprot_processing_type == processing_type_targetp) &
+          (uniprot_processing_type %in% c("not_canonical", "not_canonical_no_procc_annot")) ~ "Other",
+        (uniprot_processing_type != processing_type_targetp) &
+          (uniprot_processing_type %in% c("not_canonical", "not_canonical_no_procc_annot")) &
+          (processing_type_targetp != "not_canonical") ~ "TargetP",
+        (uniprot_processing_type != processing_type_targetp) &
+          !(uniprot_processing_type %in% c("not_canonical", "not_canonical_no_procc_annot")) &
+          (processing_type_targetp == "not_canonical") ~ "Uniprot",
+        (uniprot_processing_type != processing_type_targetp) &
+          !(uniprot_processing_type %in% c("not_canonical", "not_canonical_no_procc_annot")) &
+          (processing_type_targetp != "not_canonical") ~ "Conflict/both",
+        TRUE ~ "Other"
+      )
+    ) %>%
+    mutate(
+      source_processing_annotation = case_when(
+        str_detect(processing_type_terminer, "not_canonical") ~ "Other",
+        TRUE ~ source_processing_annotation
+      )
+    )
+
+  } else {
+
+  final_annotated_df <- final_annotated_df %>%
+    mutate(
+      targetp_category = NA_character_,
+      targetp_p1_position = NA_real_,
+      targetp_matches_p1_prime = NA,
+      processing_type_targetp = "not_canonical",
+      processing_type_terminer = dplyr::coalesce(uniprot_processing_type, "not_canonical_no_procc_annot"),
+      source_processing_annotation = case_when(
+        str_detect(processing_type_terminer, "not_canonical") ~ "Other",
+        TRUE ~ "Uniprot"
+      )
+    )
+
+  }
+
+final_annotated_df <- final_annotated_df %>%
+  mutate(
+    processing_type = case_when(
+      str_detect(processing_type_terminer, "INIT_MET") ~ "P2",
+      processing_type_terminer == "Intact_ORF" ~ "P1",
+      processing_type_terminer == "mTP" ~ "MTS",
+      processing_type_terminer == "SIGNAL" ~ "SP",
+      processing_type_terminer == "not_canonical_no_procc_annot" ~ "not_canonical",
+      TRUE ~ processing_type_terminer
+    )
+  ) %>%
+  mutate(
+    processing_type = factor(
+      processing_type,
+      levels = c("P1", "P2", "SP", "MTS", "cTP", "luTP", "TRANSIT", "PROPEP", "not_canonical")
     )
   ) %>%
   dplyr::relocate(
@@ -738,6 +924,13 @@ final_annotated_df <- left_join(
     uniprot_processing_type,
     processing_annotation_start,
     processing_annotation_end,
+    targetp_category,
+    targetp_p1_position,
+    targetp_matches_p1_prime,
+    processing_type_targetp,
+    processing_type_terminer,
+    processing_type,
+    source_processing_annotation,
     matches_p1_prime,
     # include both ID and name-based annotations
     protease_merops_ids,

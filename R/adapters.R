@@ -126,6 +126,9 @@ fragpipe_adapter <- function(parent_dir,
         str_detect(`Assigned Modifications`, "N-term\\(42.010[0-9]\\)") ~ "Acetyl",
         str_detect(`Assigned Modifications`, "N-term\\(28.031[0-9]\\)") ~ "Dimethyl",
         str_detect(`Assigned Modifications`, "N-term\\(36.075[0-9]\\)") ~ "Dimethyl",
+        str_detect(`Assigned Modifications`, "N-term\\(34.063[0-9]\\)") ~ "Dimethyl",
+        str_detect(`Assigned Modifications`, "N-term\\(7.947[0-9]\\)") ~ "Acetyl", # when dimethyl 34 is set as fixed N-term modif
+        str_detect(`Assigned Modifications`, "N-term\\(27.994[0-9]*\\)") ~ "Formyl",
         str_detect(`Assigned Modifications`, "N-term\\(89.030[0-9]\\)") ~ "2PCA",
         str_detect(`Assigned Modifications`, "Q\\(\\-17.026[0-9]\\)") ~ "Pyro-Glu",
         str_detect(`Assigned Modifications`, "E\\(\\-18.010[0-9]\\)") ~ "Pyro-Glu",
@@ -532,7 +535,7 @@ fragpipe_adapter <- function(parent_dir,
 #' @return A data frame with at least 4 columns
 #' \describe{
 #'  \item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
-#'  \item{nterm_modif}{N-terminal modification. Only Acetyl annotation is available in the current version}
+#'  \item{nterm_modif}{N-terminal modification}
 #'  \item{peptide}{Peptide sequence}
 #'  \item{protein}{Protein ID based on Uniprot Accession}
 #' }
@@ -603,11 +606,13 @@ spectronaut_adapter <- function(
         str_count(protein, "\\,") > 0 ~ TRUE,
         TRUE ~ FALSE
       ),
-      # annotate N-termini (only acetyl supported for now)
+      # annotate N-termini
       nterm_modif = case_when(
+        str_detect(eg_modified_sequence, "TMT.*\\(N-term\\)") ~ "TMT",
         str_detect(eg_modified_sequence, "Acetyl \\(N-term\\)") ~ "Acetyl",
+        str_detect(eg_modified_sequence, "Dimethyl \\(N-term\\)") ~ "Dimethyl",
+        str_detect(eg_modified_sequence, "Formyl \\(N-term\\)") ~ "Formyl",
         TRUE ~ "n"
-        # no support for dimethyl yet, but can be implemented here needed
       )
     ) %>%
     # filter for proteotypic peptides
@@ -682,7 +687,7 @@ spectronaut_adapter <- function(
 #' @return A data frame with at least 4 columns
 #' \describe{
 #'  \item{nterm_modif_peptide}{Peptide identification merging N-terminal modification + peptide sequence}
-#'  \item{nterm_modif}{N-terminal modification. Currently no N-terminal modification is supported for DIANN data}
+#'  \item{nterm_modif}{N-terminal modification based on UniMod notation}
 #'  \item{peptide}{Peptide sequence}
 #'  \item{protein}{Protein ID based on Uniprot Accession}
 #' }
@@ -1072,6 +1077,7 @@ psm_tsv_sel <- psm_tsv %>%
         str_detect(`Assigned Modifications`, "N-term\\(36.075[0-9]\\)") ~ "Dimethyl",
         str_detect(`Assigned Modifications`, "N-term\\(34.063[0-9]\\)") ~ "Dimethyl",
         str_detect(`Assigned Modifications`, "N-term\\(7.947[0-9]\\)") ~ "Acetyl", # when dimethyl 34 is set as fixed N-term modif
+        str_detect(`Assigned Modifications`, "N-term\\(27.994[0-9]*\\)") ~ "Formyl",
         str_detect(`Assigned Modifications`, "N-term\\(89.030[0-9]\\)") ~ "2PCA",
         str_detect(`Assigned Modifications`, "Q\\(\\-17.026[0-9]\\)") ~ "Pyro-Glu",
         str_detect(`Assigned Modifications`, "E\\(\\-18.010[0-9]\\)") ~ "Pyro-Glu",
@@ -1190,12 +1196,20 @@ fragpipe_dda_heavy_light_adapter <- function(
   processed_df <- combined_lqb_quant %>%
     mutate(
       nterm_modif = case_when(
+        str_detect(modified_peptide, "n\\[304.207[0-9]\\]") ~ "TMT",
+        str_detect(modified_peptide, "n\\[229.162[0-9]\\]") ~ "TMT",
         str_detect(modified_peptide, "n\\[42.010[0-9]\\]") ~ "Acetyl",
+        str_detect(modified_peptide, "n\\[7.947[0-9]\\]") ~ "Acetyl", # when dimethyl 34 is set as fixed N-term modif
+        str_detect(modified_peptide, "n\\[27.994[0-9]*\\]") ~ "Formyl",
+        str_detect(modified_peptide, "n\\[28.031[0-9]\\]") ~ "Dimethyl",
+        str_detect(modified_peptide, "n\\[36.075[0-9]\\]") ~ "Dimethyl",
+        str_detect(modified_peptide, "n\\[34.063[0-9]\\]") ~ "Dimethyl",
         str_detect(modified_peptide, "n\\[42.010[0-9]\\]", negate = TRUE) &
           (str_detect(light_modified_peptide, "n\\[28.031[0-9]\\]") |
              str_detect(heavy_modified_peptide, "n\\[34.063[0-9]\\]")) ~ "Dimethyl",
-        str_detect(`Assigned Modifications`, "Q\\(\\-17.026[0-9]\\)") ~ "Pyro-Glu",
-        str_detect(`Assigned Modifications`, "E\\(\\-18.010[0-9]\\)") ~ "Pyro-Glu",
+        str_detect(modified_peptide, "n\\[89.030[0-9]\\]") ~ "2PCA",
+        str_detect(modified_peptide, "Q\\[\\-17.026[0-9]\\]") ~ "Pyro-Glu",
+        str_detect(modified_peptide, "E\\[\\-18.010[0-9]\\]") ~ "Pyro-Glu",
         TRUE ~ "n"
       ),
       peptide = peptide_sequence,

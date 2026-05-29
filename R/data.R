@@ -238,6 +238,162 @@
 #' }
 #' @source Uniprot API (queried on May 2026)
 "synechocystis_uniprot_processing"
+
+#' @title Human TargetP processing annotation
+#'
+#' @description Tabular annotation of TargetP-predicted processing sites
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{Uniprot accession ID}
+#'  \item{targetp_category}{TargetP prediction category}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position}
+#' }
+#' @source TargetP 2.0 prediction output
+"human_targetp_processing"
+
+#' @title Mouse TargetP processing annotation
+#'
+#' @description Tabular annotation of TargetP-predicted processing sites
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{Uniprot accession ID}
+#'  \item{targetp_category}{TargetP prediction category}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position}
+#' }
+#' @source TargetP 2.0 prediction output
+"mouse_targetp_processing"
+
+#' @title Arabidopsis thaliana TargetP processing annotation
+#'
+#' @description Tabular annotation of TargetP-predicted processing sites
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{Uniprot accession ID}
+#'  \item{targetp_category}{TargetP prediction category}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position}
+#' }
+#' @source TargetP 2.0 prediction output
+"arabidopsis_targetp_processing"
+
+#' @title Rattus norvegicus TargetP processing annotation
+#'
+#' @description Tabular annotation of TargetP-predicted processing sites
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{Uniprot accession ID}
+#'  \item{targetp_category}{TargetP prediction category}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position}
+#' }
+#' @source TargetP 2.0 prediction output
+"rat_targetp_processing"
+
+#' @title Saccharomyces cerevisiae TargetP processing annotation
+#'
+#' @description Tabular annotation of TargetP-predicted processing sites
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{Uniprot accession ID}
+#'  \item{targetp_category}{TargetP prediction category}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position}
+#' }
+#' @source TargetP 2.0 prediction output
+"yeast_targetp_processing"
+
+#' @title Medicago truncatula TargetP processing annotation
+#'
+#' @description Tabular annotation of TargetP-predicted processing sites
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{Uniprot accession ID}
+#'  \item{targetp_category}{TargetP prediction category}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position}
+#' }
+#' @source TargetP 2.0 prediction output
+"medicago_trucantula_targetp_processing"
+
+#' @title Rhizobium melitoli TargetP processing annotation
+#'
+#' @description Tabular annotation of TargetP-predicted processing sites
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{Uniprot accession ID}
+#'  \item{targetp_category}{TargetP prediction category}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position}
+#' }
+#' @source TargetP 2.0 prediction output
+"rhizobium_melitoli_targetp_processing"
+
+#' @title Sus scrofa TargetP processing annotation
+#'
+#' @description Tabular annotation of TargetP-predicted processing sites
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{Uniprot accession ID}
+#'  \item{targetp_category}{TargetP prediction category}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position}
+#' }
+#' @source TargetP 2.0 prediction output
+"pig_targetp_processing"
+
+#' @title Human TargetP processing annotation. Swissprot including isoforms.
+#'
+#' @description Tabular annotation of TargetP-predicted processing sites
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{Uniprot accession ID}
+#'  \item{targetp_category}{TargetP prediction category}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position}
+#' }
+#' @source TargetP 2.0 prediction output
+"human_iso_targetp_processing"
+
+#' @title Escherichia coli TargetP processing annotation
+#'
+#' @description Tabular annotation of TargetP-predicted processing sites
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{Uniprot accession ID}
+#'  \item{targetp_category}{TargetP prediction category}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position}
+#' }
+#' @source TargetP 2.0 prediction output
+"ecoli_targetp_processing"
+
+#' @title Caenorhabditis elegans TargetP processing annotation
+#'
+#' @description Tabular annotation of TargetP-predicted processing sites
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{Uniprot accession ID}
+#'  \item{targetp_category}{TargetP prediction category}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position}
+#' }
+#' @source TargetP 2.0 prediction output
+"c_elegans_targetp_processing"
+
+#' @title Synechocystis sp. PCC 6803 TargetP processing annotation
+#'
+#' @description Tabular annotation of TargetP-predicted processing sites
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{Uniprot accession ID}
+#'  \item{targetp_category}{TargetP prediction category}
+#'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position}
+#' }
+#' @source TargetP 2.0 prediction output
+"synechocystis_targetp_processing"
 #' MEROPS known protease cleavage sites and P4–P4' windows
 #'
 #' Tabular cleavage events joined to UniProt substrate sequences with P4…P4' windows.

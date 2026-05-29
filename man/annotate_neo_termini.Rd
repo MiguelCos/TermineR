@@ -73,6 +73,13 @@ has not been annotated in UniProt processing features.
 maps to a Uniprot protein ID that does not have processing features information.}
 \item{processing_annotation_start}{Start position of the processing feature in the protein sequence}
 \item{processing_annotation_end}{End position of the processing feature in the protein sequence}
+\item{targetp_category}{TargetP prediction category, when available}
+\item{targetp_p1_position}{TargetP predicted P1 cleavage position, when available}
+\item{targetp_matches_p1_prime}{Logical. TRUE if the peptide cleavage position matches the TargetP prediction}
+\item{processing_type_targetp}{Processing type inferred from TargetP}
+\item{processing_type_terminer}{Resolved processing annotation using TargetP when available, otherwise UniProt}
+\item{processing_type}{Final processing-site classification}
+\item{source_processing_annotation}{Annotation source supporting the final processing-site classification}
 \item{protein_sequence}{Protein sequence}
 \item{sample_columns}{Scaled abundances of annotated features per sample}
 \item{protease_merops_ids}{Pipe-separated MEROPS protease IDs matching the exact site (from MEROPS known sites)}
