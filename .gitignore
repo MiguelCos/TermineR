@@ -14,8 +14,12 @@ debug.log
 /scr/tests_merops.R
 /scr/tests.R
 /scr/prepare_uniprot_tis_annotations.R
+/scr/run_targetp2.sh
+/scr/README_targetp.md
+/scr/run_targetp_all_linux.sh
+/scr/run_targetp_remote_all.ps1
 
-percentage_of_nterm_tryptic.qmd
+/percentage_of_nterm_tryptic.qmd
 README.qmd
 DATASET.R
 download_and_process_unimod.R
