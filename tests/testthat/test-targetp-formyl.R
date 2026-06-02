@@ -1,10 +1,28 @@
 test_that("UniMod mapping includes Formyl", {
   data("unimod_id_to_name_mapping", package = "TermineR")
 
+  expect_true(all(
+    c(
+      "id",
+      "id_nr",
+      "name",
+      "monoisotopic_mass",
+      "average_mass",
+      "composition"
+    ) %in% colnames(unimod_id_to_name_mapping)
+  ))
+
+  formyl_mapping <- unimod_id_to_name_mapping[
+    unimod_id_to_name_mapping$id_nr == 122,
+  ]
+
   expect_true(any(
     unimod_id_to_name_mapping$id_nr == 122 &
       unimod_id_to_name_mapping$name == "Formyl"
   ))
+  expect_equal(formyl_mapping$monoisotopic_mass[[1]], 27.994915, tolerance = 1e-6)
+  expect_equal(formyl_mapping$average_mass[[1]], 28.0101, tolerance = 1e-6)
+  expect_equal(formyl_mapping$composition[[1]], "C O")
 })
 
 test_that("TargetP package data have expected columns", {

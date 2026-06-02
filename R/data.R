@@ -112,17 +112,20 @@
 #' @source Uniprot API (queried on July 2024)
 "pig_uniprot_processing"
 
-#' @title UniMOd ID to modification name mapping 
+#' @title UniMod ID to modification name mapping
 #'
-#' @description Tabular annotation of the numerical ID from UniMod and their associated modifications
+#' @description Tabular annotation of UniMod IDs, names, masses, and compositions
 #'   
 #' @format A data frame
 #' \describe{
 #'  \item{id}{UniMod ID}
 #'  \item{id_nr}{Numerical UniMod ID}
 #'  \item{name}{Descriptive name of the modification}
+#'  \item{monoisotopic_mass}{Monoisotopic mass delta of the modification}
+#'  \item{average_mass}{Average mass delta of the modification}
+#'  \item{composition}{Chemical composition delta of the modification}
 #' }
-#' @source Uniprot API (queried on August 2024)
+#' @source UniMod OBO (queried on June 2026)
 "unimod_id_to_name_mapping"
 
 #' @title Arabidopsis thaliana protein processing annotation from Uniprot API

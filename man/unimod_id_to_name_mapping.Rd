@@ -3,22 +3,25 @@
 \docType{data}
 \name{unimod_id_to_name_mapping}
 \alias{unimod_id_to_name_mapping}
-\title{UniMOd ID to modification name mapping}
+\title{UniMod ID to modification name mapping}
 \format{
 A data frame
 \describe{
 \item{id}{UniMod ID}
 \item{id_nr}{Numerical UniMod ID}
 \item{name}{Descriptive name of the modification}
+\item{monoisotopic_mass}{Monoisotopic mass delta of the modification}
+\item{average_mass}{Average mass delta of the modification}
+\item{composition}{Chemical composition delta of the modification}
 }
 }
 \source{
-Uniprot API (queried on August 2024)
+UniMod OBO (queried on June 2026)
 }
 \usage{
 unimod_id_to_name_mapping
 }
 \description{
-Tabular annotation of the numerical ID from UniMod and their associated modifications
+Tabular annotation of UniMod IDs, names, masses, and compositions
 }
 \keyword{datasets}

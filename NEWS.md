@@ -1,3 +1,10 @@
+# TermineR 1.4.1
+
+## Minor improvements
+
+- Updated `unimod_id_to_name_mapping` from the UniMod OBO and added monoisotopic mass, average mass, and composition columns.
+- Added `scr/prepare_unimod_id_to_name_mapping.R` to make the UniMod mapping refresh reproducible.
+
 # TermineR 1.4.0
 
 ## Minor improvements
