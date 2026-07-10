@@ -397,6 +397,30 @@
 #' }
 #' @source TargetP 2.0 prediction output
 "synechocystis_targetp_processing"
+#' @title Human CaspSites processing annotation
+#'
+#' @description Tabular annotation of experimentally observed human caspase cleavage sites from CaspSites.
+#'
+#' @format A data frame
+#' \describe{
+#'  \item{protein}{UniProt accession ID}
+#'  \item{caspsites_p1_prime_position}{CaspSites cleavage-site position, reported as the P1' residue number}
+#'  \item{caspsites_p1_position}{P1 residue position inferred as caspsites_p1_prime_position - 1}
+#'  \item{caspsites_cleavage_sequence}{Eight-residue P4-P4' cleavage sequence}
+#'  \item{caspsites_cleavage_site}{Eight-residue P4-P4' cleavage site with a pipe between P1 and P1'}
+#'  \item{caspsites_datasets}{Pipe-separated CaspSites datasets supporting the site}
+#'  \item{caspsites_uniprot_entry_names}{Pipe-separated UniProt entry names reported by CaspSites}
+#'  \item{caspsites_peptides}{Pipe-separated peptides reported by CaspSites, when available}
+#'  \item{caspsites_cell_lines}{Pipe-separated cell lines reported by CaspSites}
+#'  \item{caspsites_perturbagens}{Pipe-separated perturbagens reported by CaspSites}
+#'  \item{caspsites_labels}{Pipe-separated experimental labels/method labels reported by CaspSites}
+#'  \item{caspsites_pubmed}{Pipe-separated PubMed links supporting the site}
+#'  \item{caspsites_doi}{Pipe-separated DOI links supporting the site}
+#'  \item{caspsites_authors}{Pipe-separated publication author labels supporting the site}
+#'  \item{caspsites_evidence_count}{Number of CaspSites rows aggregated into this protein-site record}
+#' }
+#' @source CaspSites search CSV export; https://www.caspsites.org/ (Wang and Julien, 2023)
+"human_caspsites_processing"
 #' MEROPS known protease cleavage sites and P4–P4' windows
 #'
 #' Tabular cleavage events joined to UniProt substrate sequences with P4…P4' windows.

@@ -57,6 +57,69 @@ test_that("TargetP package data have expected columns", {
   }
 })
 
+test_that("CaspSites package data have expected columns", {
+  caspsites_env <- new.env(parent = emptyenv())
+  data("human_caspsites_processing", package = "TermineR", envir = caspsites_env)
+  human_caspsites_processing <- get("human_caspsites_processing", envir = caspsites_env)
+
+  expect_true(all(
+    c(
+      "protein",
+      "caspsites_p1_position",
+      "caspsites_p1_prime_position",
+      "caspsites_cleavage_sequence",
+      "caspsites_cleavage_site",
+      "caspsites_datasets",
+      "caspsites_evidence_count"
+    ) %in% colnames(human_caspsites_processing)
+  ))
+
+  expect_true(nrow(human_caspsites_processing) > 0)
+  expect_true(all(!is.na(human_caspsites_processing$protein)))
+  expect_true(all(!is.na(human_caspsites_processing$caspsites_p1_prime_position)))
+  expect_true(all(human_caspsites_processing$caspsites_p1_prime_position > 0))
+  caspsites_sequences <- unlist(strsplit(
+    human_caspsites_processing$caspsites_cleavage_sequence,
+    "|",
+    fixed = TRUE
+  ))
+  expect_true(all(nchar(caspsites_sequences) == 8))
+})
+test_that("annotate_neo_termini adds human CaspSites exact-site annotation", {
+  peptide <- "GSASEVPSELSERPK"
+  sequence <- paste0(strrep("A", 40), "DQKD", peptide, strrep("A", 20))
+  fasta_file <- tempfile(fileext = ".fasta")
+
+  writeLines(
+    c(
+      ">sp|A0A096LP01|SIM26_HUMAN",
+      sequence
+    ),
+    fasta_file
+  )
+
+  peptides_df <- data.frame(
+    nterm_modif_peptide = paste0("n_", peptide),
+    nterm_modif = "n",
+    peptide = peptide,
+    protein = "A0A096LP01",
+    sample1 = 1,
+    check.names = FALSE
+  )
+
+  annotated <- annotate_neo_termini(
+    peptides_df = peptides_df,
+    fasta_location = fasta_file,
+    sense = "C",
+    specificity = "K|R",
+    organism = "human",
+    pssm_prediction = FALSE
+  )
+
+  expect_true(any(annotated$caspsites_matches_p1_prime))
+  expect_true(any(annotated$caspsites_p1_prime_position == 45))
+  expect_true(any(grepl("Caspase-3", annotated$caspsites_datasets, fixed = TRUE)))
+})
 test_that("unsupported organisms fail early", {
   expect_error(
     annotate_neo_termini(

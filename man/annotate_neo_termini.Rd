@@ -82,6 +82,11 @@ maps to a Uniprot protein ID that does not have processing features information.
 \item{source_processing_annotation}{Annotation source supporting the final processing-site classification}
 \item{protein_sequence}{Protein sequence}
 \item{sample_columns}{Scaled abundances of annotated features per sample}
+\item{caspsites_matches_p1_prime}{Logical. TRUE if a human peptide cleavage position exactly matches a CaspSites P1' position}
+\item{caspsites_p1_prime_position}{CaspSites P1' cleavage position for exact human matches}
+\item{caspsites_cleavage_sequence}{Pipe-separated CaspSites P4-P4' sequences supporting the exact site}
+\item{caspsites_datasets}{Pipe-separated CaspSites datasets supporting the exact site}
+\item{caspsites_evidence_count}{Number of CaspSites evidence rows aggregated for the exact site}
 \item{protease_merops_ids}{Pipe-separated MEROPS protease IDs matching the exact site (from MEROPS known sites)}
 \item{protease_merops_names}{Pipe-separated human-readable names for the corresponding MEROPS IDs; falls back to ID if name is unavailable}
 \item{predicted_protease_activity_ids}{Top-N predicted proteases scored by PSSM on the window8 sequence, as pipe-separated "ID:score" pairs (score in log2 odds). Empty strings when pssm_prediction = FALSE or when no candidate proteases are available after filtering.}

@@ -55,6 +55,11 @@
 #'  \item{source_processing_annotation}{Annotation source supporting the final processing-site classification}
 #'  \item{protein_sequence}{Protein sequence}
 #'  \item{sample_columns}{Scaled abundances of annotated features per sample}
+#'  \item{caspsites_matches_p1_prime}{Logical. TRUE if a human peptide cleavage position exactly matches a CaspSites P1' position}
+#'  \item{caspsites_p1_prime_position}{CaspSites P1' cleavage position for exact human matches}
+#'  \item{caspsites_cleavage_sequence}{Pipe-separated CaspSites P4-P4' sequences supporting the exact site}
+#'  \item{caspsites_datasets}{Pipe-separated CaspSites datasets supporting the exact site}
+#'  \item{caspsites_evidence_count}{Number of CaspSites evidence rows aggregated for the exact site}
 #'  \item{protease_merops_ids}{Pipe-separated MEROPS protease IDs matching the exact site (from MEROPS known sites)}
 #'  \item{protease_merops_names}{Pipe-separated human-readable names for the corresponding MEROPS IDs; falls back to ID if name is unavailable}
 #'  \item{predicted_protease_activity_ids}{Top-N predicted proteases scored by PSSM on the window8 sequence, as pipe-separated "ID:score" pairs (score in log2 odds). Empty strings when pssm_prediction = FALSE or when no candidate proteases are available after filtering.}
@@ -877,6 +882,86 @@ if(!is.null(targetp_processing)){
 
   }
 
+caspsites_processing <- NULL
+
+if(organism == "human"){
+
+  caspsites_env <- new.env(parent = emptyenv())
+
+  caspsites_data <- try(
+    data(
+      list = "human_caspsites_processing",
+      package = "TermineR",
+      envir = caspsites_env
+    ),
+    silent = TRUE
+  )
+
+  if(!inherits(caspsites_data, "try-error") &&
+     exists("human_caspsites_processing", envir = caspsites_env)){
+
+    caspsites_processing <- get(
+      "human_caspsites_processing",
+      envir = caspsites_env
+    )
+
+  }
+
+}
+
+if(!is.null(caspsites_processing)){
+
+  final_annotated_df <- final_annotated_df %>%
+    left_join(
+      caspsites_processing,
+      by = c(
+        "protein" = "protein",
+        "p1_prime_position" = "caspsites_p1_prime_position"
+      )
+    )
+
+} else {
+
+  final_annotated_df <- final_annotated_df %>%
+    mutate(
+      caspsites_p1_position = NA_integer_,
+      caspsites_cleavage_sequence = NA_character_,
+      caspsites_cleavage_site = NA_character_,
+      caspsites_datasets = NA_character_,
+      caspsites_uniprot_entry_names = NA_character_,
+      caspsites_peptides = NA_character_,
+      caspsites_cell_lines = NA_character_,
+      caspsites_perturbagens = NA_character_,
+      caspsites_labels = NA_character_,
+      caspsites_pubmed = NA_character_,
+      caspsites_doi = NA_character_,
+      caspsites_authors = NA_character_,
+      caspsites_evidence_count = NA_integer_
+    )
+
+}
+
+final_annotated_df <- final_annotated_df %>%
+  mutate(
+    caspsites_matches_p1_prime = !is.na(caspsites_p1_position),
+    caspsites_p1_prime_position = case_when(
+      caspsites_matches_p1_prime ~ as.integer(p1_prime_position),
+      TRUE ~ NA_integer_
+    ),
+    caspsites_cleavage_sequence = dplyr::coalesce(caspsites_cleavage_sequence, ""),
+    caspsites_cleavage_site = dplyr::coalesce(caspsites_cleavage_site, ""),
+    caspsites_datasets = dplyr::coalesce(caspsites_datasets, ""),
+    caspsites_uniprot_entry_names = dplyr::coalesce(caspsites_uniprot_entry_names, ""),
+    caspsites_peptides = dplyr::coalesce(caspsites_peptides, ""),
+    caspsites_cell_lines = dplyr::coalesce(caspsites_cell_lines, ""),
+    caspsites_perturbagens = dplyr::coalesce(caspsites_perturbagens, ""),
+    caspsites_labels = dplyr::coalesce(caspsites_labels, ""),
+    caspsites_pubmed = dplyr::coalesce(caspsites_pubmed, ""),
+    caspsites_doi = dplyr::coalesce(caspsites_doi, ""),
+    caspsites_authors = dplyr::coalesce(caspsites_authors, ""),
+    caspsites_evidence_count = dplyr::coalesce(caspsites_evidence_count, 0L)
+  )
+
 final_annotated_df <- final_annotated_df %>%
   mutate(
     processing_type = case_when(
@@ -932,6 +1017,21 @@ final_annotated_df <- final_annotated_df %>%
     processing_type,
     source_processing_annotation,
     matches_p1_prime,
+    caspsites_matches_p1_prime,
+    caspsites_p1_position,
+    caspsites_p1_prime_position,
+    caspsites_cleavage_sequence,
+    caspsites_cleavage_site,
+    caspsites_datasets,
+    caspsites_uniprot_entry_names,
+    caspsites_peptides,
+    caspsites_cell_lines,
+    caspsites_perturbagens,
+    caspsites_labels,
+    caspsites_pubmed,
+    caspsites_doi,
+    caspsites_authors,
+    caspsites_evidence_count,
     # include both ID and name-based annotations
     protease_merops_ids,
     protease_merops_names,
