@@ -1,5 +1,4 @@
-# TermineR: extracting information on endogenous proteolytic processing
-from shotgun proteomics data.
+# TermineR: extracting information on endogenous proteolytic processingfrom shotgun proteomics data.
 
 
 - [TermineR: extracting information on endogenous proteolytic processing](#terminer-extracting-information-on-endogenous-proteolytic-processing)
