@@ -5,8 +5,7 @@ Authors@R: person("Miguel", "Cosenza-Contreras", email = "migueljcc5@gmail.com",
                   role = c("aut", "cre"))
 Maintainer: Miguel Cosenza-Contreras <migueljcc5@gmail.com>
 Description: Data analysis approach for the annotation, and differential analysis of proteolytic products (i.e. semi-specific peptides) from shotgun proteomics search results.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
