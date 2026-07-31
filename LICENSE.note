@@ -1,0 +1,17 @@
+TermineR is distributed under the GNU General Public License, version 3.
+
+The local DIA-NN report-loading and matrix helper logic in R/adapters.R is an
+adaptation of code from:
+
+  diann-rpackage, by Vadim Demichev
+  https://github.com/vdemichev/diann-rpackage
+  Source file: https://github.com/vdemichev/diann-rpackage/blob/master/R/diann-R.R
+
+The upstream diann-rpackage is licensed under the Creative Commons Attribution
+4.0 International license (CC BY 4.0):
+
+  https://creativecommons.org/licenses/by/4.0/
+
+Changes made in TermineR include Arrow-backed Parquet report loading, local
+SUM/MAX aggregation, numeric coercion for report quantities, and integration
+with the TermineR adapter output and normalization workflow.

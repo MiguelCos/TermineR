@@ -25,7 +25,7 @@ Imports:
   seqinr,
   tibble,
   tidyr,
-  diann,
+  arrow,
   janitor,
   readr,
   here,

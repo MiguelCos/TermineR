@@ -678,7 +678,7 @@ spectronaut_adapter <- function(
 #'
 #' @title diann_adapter
 #'
-#' @param path_to_file path to report file with DIANN search results in tsv format
+#' @param path_to_file path to report file with DIANN search results in TSV or Parquet format
 #' @param proteotypic keep only proteotypic peptides. Default is TRUE.
 #' @param summarization quantitative summarization approach for features identified by several precursors.
 #' "SUM" will sum up the intensities of the precursors. "MAX" will keep the intensity of the precursor with higher intensity.
@@ -695,7 +695,6 @@ spectronaut_adapter <- function(
 #' @description
 #' Process report file from DIANN search results for further analysis with TermineR
 #'
-#' @importFrom diann diann_load diann_matrix
 #' @importFrom tibble as_tibble rownames_to_column
 #' @importFrom dplyr select mutate distinct arrange group_by summarize ungroup
 #' @importFrom tidyselect where
@@ -713,90 +712,177 @@ diann_adapter <- function(
     summarization = "SUM" # options: "SUM" or "MAX"
     ) {
 
-  require(diann)
   require(tibble)
   require(dplyr)
   require(tidyr)
   require(stringr)
   require(data.table)
+  require(purrr)
+  require(readr)
   
   data("unimod_id_to_name_mapping", package = "TermineR")
   
-  # the following function modifications are based on the diann R package code hosted on GitHub
+  # Attribution and adaptation notice:
+  # The loader, pivot, and matrix logic below is adapted from the
+  # diann-rpackage R implementation by Vadim Demichev:
   # https://github.com/vdemichev/diann-rpackage/blob/master/R/diann-R.R
-  
-  # pivot_aggregate function modified to sum up instead of get max value
-  pivot_aggregate_2 <- function(
-    df, 
-    sample.header, 
-    id.header, 
-    quantity.header) {
-    
-    x <- melt.data.table(
-      df, 
-      id.vars = c(
-        sample.header, 
-        id.header), 
-      measure.vars = c(
-        quantity.header))
-    
+  # The upstream package is licensed CC BY 4.0. This adaptation changes the
+  # input path to support Arrow-backed Parquet reports and provides both SUM
+  # and MAX aggregation locally; see LICENSE.note for the full attribution.
+  #
+  # DIA-NN reports are tabular files: recent versions write Parquet reports,
+  # while older versions commonly write TSV reports.
+  diann_load_local <- function(path) {
+    if (!file.exists(path)) {
+      stop("DIA-NN report file does not exist: ", path, call. = FALSE)
+    }
+
+    if (grepl("\\.parquet$", path, ignore.case = TRUE)) {
+      if (!requireNamespace("arrow", quietly = TRUE)) {
+        stop(
+          "Reading DIA-NN Parquet reports requires the 'arrow' package.",
+          call. = FALSE
+        )
+      }
+
+      return(as.data.frame(arrow::read_parquet(path, as_data_frame = TRUE)))
+    }
+
+    as.data.frame(
+      data.table::fread(
+        path,
+        stringsAsFactors = FALSE,
+        data.table = FALSE
+      )
+    )
+  }
+
+  diann_pivot_local <- function(
+      df,
+      sample.header,
+      id.header,
+      quantity.header) {
+    x <- data.table::melt.data.table(
+      df,
+      id.vars = c(sample.header, id.header),
+      measure.vars = quantity.header
+    )
     x$value[which(x$value == 0)] <- NA
-    
+
     piv <- as.data.frame(
-      dcast.data.table(x, 
-                       as.formula(paste0(id.header,'~',sample.header)), 
-                       value.var = "value", 
-                       fun.aggregate = function(x) sum(x, na.rm=TRUE))) 
-    
+      data.table::dcast.data.table(
+        x,
+        stats::as.formula(paste0(id.header, "~", sample.header)),
+        value.var = "value"
+      )
+    )
+
     rownames(piv) <- piv[[1]]
-    
     piv[[1]] <- NULL
-    
-    piv <- piv[order(rownames(piv)),]
-    
-    piv = as.matrix(piv)
-    
+    piv <- piv[order(rownames(piv)), , drop = FALSE]
+    piv <- as.matrix(piv)
     piv[is.infinite(piv)] <- NA
-    
-    # check if value is 0
-    piv[piv == 0] <- NA
-    
     piv
   }
-  
-  # modify diann_matrix function to sum up instead of calculating max
-  diann_matrix_2 <- function(
-    x, 
-    id.header = "Precursor.Id", 
-    quantity.header = "Precursor.Normalised", 
-    proteotypic.only = F, 
-    q = 0.01, 
-    protein.q = 1.0, 
-    pg.q = 1.0, 
-    gg.q = 1.0) {
-    
-    df <- as.data.table(x)
-    
-    if (proteotypic.only) df <- df[which(df[['Proteotypic']] != 0),]
-    
-    df <- unique(df[which(df[[id.header]] != "" & df[[quantity.header]] > 0 & df[['Q.Value']] <= q & df[['Protein.Q.Value']] <= protein.q & df[['PG.Q.Value']] <= pg.q & df[['GG.Q.Value']] <= gg.q),c("File.Name", id.header, quantity.header),with=FALSE])
-    
-    is_duplicated = any(duplicated(paste0(df[["File.Name"]],":",df[[id.header]])))
-    
-    if (is_duplicated) {
-      
-      warning("Multiple quantities per id: the sum of these will be calculated")
-      pivot_aggregate_2(df,"File.Name",id.header,quantity.header)
-      
-    } else {
-      
-      pivot(df,"File.Name",id.header,quantity.header)
-      
-    }
-  }
-  
 
-  diann_df_min <- diann_load(path_to_file) %>%
+  diann_pivot_aggregate_local <- function(
+      df,
+      sample.header,
+      id.header,
+      quantity.header,
+      aggregation = c("max", "sum")) {
+    aggregation <- match.arg(aggregation)
+    aggregate_fun <- switch(
+      aggregation,
+      max = function(x) if (all(is.na(x))) NA_real_ else max(x, na.rm = TRUE),
+      sum = function(x) sum(x, na.rm = TRUE)
+    )
+
+    x <- data.table::melt.data.table(
+      df,
+      id.vars = c(sample.header, id.header),
+      measure.vars = quantity.header
+    )
+    x$value[which(x$value == 0)] <- NA
+
+    piv <- as.data.frame(
+      data.table::dcast.data.table(
+        x,
+        stats::as.formula(paste0(id.header, "~", sample.header)),
+        value.var = "value",
+        fun.aggregate = aggregate_fun
+      )
+    )
+
+    rownames(piv) <- piv[[1]]
+    piv[[1]] <- NULL
+    piv <- piv[order(rownames(piv)), , drop = FALSE]
+    piv <- as.matrix(piv)
+    piv[is.infinite(piv)] <- NA
+    piv[piv == 0] <- NA
+    piv
+  }
+
+  diann_matrix_local <- function(
+      x,
+      id.header = "Precursor.Id",
+      quantity.header = "Precursor.Normalised",
+      proteotypic.only = FALSE,
+      q = 0.01,
+      protein.q = 1.0,
+      pg.q = 1.0,
+      gg.q = 1.0,
+      aggregation = c("max", "sum")) {
+    aggregation <- match.arg(aggregation)
+    df <- data.table::as.data.table(x)
+    df[[quantity.header]] <- as.numeric(df[[quantity.header]])
+
+    if (proteotypic.only) {
+      df <- df[which(df[["Proteotypic"]] != 0), ]
+    }
+
+    df <- unique(
+      df[
+        which(
+          df[[id.header]] != "" &
+            df[[quantity.header]] > 0 &
+            df[["Q.Value"]] <= q &
+            df[["Protein.Q.Value"]] <= protein.q &
+            df[["PG.Q.Value"]] <= pg.q &
+            df[["GG.Q.Value"]] <= gg.q
+        ),
+        c("File.Name", id.header, quantity.header),
+        with = FALSE
+      ]
+    )
+
+    is_duplicated <- any(
+      duplicated(paste0(df[["File.Name"]], ":", df[[id.header]]))
+    )
+
+    if (is_duplicated) {
+      warning(
+        paste0(
+          "Multiple quantities per id: the ",
+          aggregation,
+          " of these will be calculated"
+        )
+      )
+      return(
+        diann_pivot_aggregate_local(
+          df,
+          "File.Name",
+          id.header,
+          quantity.header,
+          aggregation
+        )
+      )
+    }
+
+    diann_pivot_local(df, "File.Name", id.header, quantity.header)
+  }
+
+  diann_df_min <- diann_load_local(path_to_file) %>%
     # extract modifications from modified_sequence check for everything inside '()'
     mutate(
       first_modif = str_extract(Modified.Sequence, "\\((.*?)\\)") %>% 
@@ -863,21 +949,23 @@ diann_adapter <- function(
   
   if(summarization == "SUM"){
   
-    diann_df_mat_min <- diann_matrix_2(
+    diann_df_mat_min <- diann_matrix_local(
       diann_df_min,
       id.header = "nterm_modif_peptide",
       quantity.header = "Precursor.Normalised",
       proteotypic.only = proteotypic,
-      q = 0.01)
+      q = 0.01,
+      aggregation = "sum")
   
   } else if(summarization == "MAX"){
   
-    diann_df_mat_min <- diann_matrix(
+    diann_df_mat_min <- diann_matrix_local(
       diann_df_min,
       id.header = "nterm_modif_peptide",
       quantity.header = "Precursor.Normalised",
       proteotypic.only = proteotypic,
-      q = 0.01)
+      q = 0.01,
+      aggregation = "max")
   
   }
 

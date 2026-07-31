@@ -7,7 +7,7 @@
 diann_adapter(path_to_file, proteotypic = TRUE, summarization = "SUM")
 }
 \arguments{
-\item{path_to_file}{path to report file with DIANN search results in tsv format}
+\item{path_to_file}{path to report file with DIANN search results in TSV or Parquet format}
 
 \item{proteotypic}{keep only proteotypic peptides. Default is TRUE.}
 
