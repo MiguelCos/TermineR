@@ -198,7 +198,7 @@ Where:
 ### DIA-NN adapter attribution
 
 The local DIA-NN report-loading and matrix helper logic in `R/adapters.R` is
-adapted from Vadim Demichev's [`diann-rpackage`](https://github.com/vdemichev/diann-rpackage)
+adapted from Vadim Demichev's [`diann-rpackage`](https://github.com/vdemichev/diann-rpackage/tree/f2997bb26922ace9d9f4ef986037e36c5a5d5fe7)
 implementation, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 The adaptation adds Arrow-backed Parquet loading and local SUM/MAX aggregation;
 the attribution and change notice are also recorded in `LICENSE.note`.

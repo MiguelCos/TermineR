@@ -725,7 +725,7 @@ diann_adapter <- function(
   # Attribution and adaptation notice:
   # The loader, pivot, and matrix logic below is adapted from the
   # diann-rpackage R implementation by Vadim Demichev:
-  # https://github.com/vdemichev/diann-rpackage/blob/master/R/diann-R.R
+  # https://github.com/vdemichev/diann-rpackage/blob/f2997bb26922ace9d9f4ef986037e36c5a5d5fe7/R/diann-R.R
   # The upstream package is licensed CC BY 4.0. This adaptation changes the
   # input path to support Arrow-backed Parquet reports and provides both SUM
   # and MAX aggregation locally; see LICENSE.note for the full attribution.

@@ -4,8 +4,8 @@ The local DIA-NN report-loading and matrix helper logic in R/adapters.R is an
 adaptation of code from:
 
   diann-rpackage, by Vadim Demichev
-  https://github.com/vdemichev/diann-rpackage
-  Source file: https://github.com/vdemichev/diann-rpackage/blob/master/R/diann-R.R
+  Commit: https://github.com/vdemichev/diann-rpackage/commit/f2997bb26922ace9d9f4ef986037e36c5a5d5fe7
+  Source file: https://github.com/vdemichev/diann-rpackage/blob/f2997bb26922ace9d9f4ef986037e36c5a5d5fe7/R/diann-R.R
 
 The upstream diann-rpackage is licensed under the Creative Commons Attribution
 4.0 International license (CC BY 4.0):
