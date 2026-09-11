@@ -6,7 +6,7 @@
 #' @param peptide_annot A data frame with the annotation of the peptides. It should contain at least a 'nterm_modif_peptide' column, matching the 'nterm_modif_peptide' column in the peptide data frame, and the 'specificity' column.
 #' @param summarize_by_specificity A logical value indicating if the protein abundances should be summarized based on specific peptides. Default is TRUE.
 #'
-#' @description This is an experimental function for the normalization of peptides abundances against the abundance of their respective proteins. The protein abundances are summarized from the peptide feature abundance information based on fully specific peptides, as a proxy for the protein abundance disregarding the effect of proteolytic activity. Then, peptide-to-protein abundance ratios are calculated based on raw intensities and log2 transformed for downstream processing.
+#' @description This experimental function uses summed fully specific peptide abundances (fully tryptic for a trypsin search) as a proxy for parent-protein abundance when summarize_by_specificity = TRUE. Each peptide abundance is divided by its corresponding protein proxy, then log2 transformed and median centered. The output is a protein-adjusted peptide-abundance proxy, not an absolute molecular fraction or a direct measure of protease activity. No external standards, reference samples, control groups, or reference peptide/protein values are required.
 #'
 #' @importFrom dplyr select filter pull mutate group_by summarise_if rename_at arrange slice relocate
 #' @importFrom purrr map
@@ -17,8 +17,8 @@
 #'
 #' @return A list with the following elements
 #' \describe{
-#'  \item{protein_normalized_pepts_scaled}{Matrix of peptide abundances scaled, after extracting fraction of peptide/protein fraction of abundance}
-#'  \item{protein_normalized_pepts_abundance}{Matrix of peptide abundances non-scaled, after extracting fraction of peptide/protein fraction of abundance}
+#'  \item{protein_normalized_pepts_scaled}{Protein-adjusted peptide-abundance proxies, log2 transformed and median centered}
+#'  \item{protein_normalized_pepts_abundance}{Peptide/protein abundance ratios representing protein-adjusted peptide-abundance proxies, before log2 transformation}
 #'  \item{summarized_protein_abundance}{Summarized protein abundances based on peptide matrix}
 #'  \item{summarized_protein_abundance_scaled}{Summarized protein abundances based on peptide matrix, scaled}
 #'  \item{summarize_by_specificity}{Logical flag indicating if protein abundances were summarized by fully specific peptides}
@@ -119,8 +119,8 @@ peptide2protein_normalization <- function(peptides,
 
   # function to get the ratio of intensity of Peptide/Protein  -----
 
-  ## this function is intended to get the fraction of peptide intensity is representative
-  ## of the total protein abundance calculated based on fully specific peptides
+  ## this function calculates peptide abundance relative to a parent-protein proxy
+  ## calculated from fully specific peptides when summarize_by_specificity is TRUE
 
   pept2prot_ratios <- function(col){
 
@@ -133,12 +133,16 @@ peptide2protein_normalization <- function(peptides,
     df_q_names <- colnames(df_q) # extract column names
 
     df_q_rat <- df_q %>%
-      # create a column for each sample to get the fraction of the peptide intensity representative of the protein abundance
-      mutate({{col}} := .data[[df_q_names[2]]] / .data[[df_q_names[3]]]) %>%
-      # generate a 'normalized' peptide intensity value, by extracting the peptide abundance associated to it's fraction of the protein abundance
-      mutate("fraction_int_peptide2prot_{col}" := .data[[{{col}}]] * .data[[df_q_names[2]]])
+      # create a peptide/protein ratio for each sample; invalid protein denominators yield NA
+      mutate({{col}} := ifelse(
+        is.finite(.data[[df_q_names[3]]]) & .data[[df_q_names[3]]] > 0,
+        .data[[df_q_names[2]]] / .data[[df_q_names[3]]],
+        NA_real_
+      )) %>%
+      # retain the ratio as a protein-adjusted peptide-abundance proxy
+      mutate("fraction_int_peptide2prot_{col}" := .data[[{{col}}]])
     df_q_rat <- df_q_rat %>%
-      # keep only the columns with the fraction of intensities (normalized)
+      # keep only the columns with peptide/protein abundance ratios
       dplyr::select(-c(nterm_modif_peptide, ends_with("peptide"), ends_with("prot")))
     return(df_q_rat)
 
@@ -158,7 +162,7 @@ peptide2protein_normalization <- function(peptides,
 
   ## normalizations ---------------------------------------------------
 
-  ### log2 and median centering of fraction of peptide intensity from peptide / protein ratios -----
+  ### log2 and median centering of peptide/protein abundance ratios -----
 
   mat_ratios2 <- pept2prot_norm_ratio %>%
     column_to_rownames("nterm_modif_peptide") %>%
@@ -174,7 +178,7 @@ peptide2protein_normalization <- function(peptides,
                            center = apply(log2_mat_rat2, 2, median,
                                           na.rm = TRUE) - median(as.matrix(log2_mat_rat2),
                                                                  na.rm = TRUE)) %>%
-    abs(.) %>% # log2 values of fractions are negative; take absolute values
+    # log2 values may be negative; retain their signs
     na.omit(.) %>% # remove rows with NA values
     as.data.frame(.) %>%
     rownames_to_column("nterm_modif_peptide")
@@ -185,7 +189,7 @@ peptide2protein_normalization <- function(peptides,
     column_to_rownames("protein") %>%
     as.matrix()
 
-  mat_ratios2[mat_ratios3 == 0] <- NA
+  mat_ratios3[!is.finite(mat_ratios3) | mat_ratios3 <= 0] <- NA
 
   log2_mat_rat3 <- mutate_all(as.data.frame(mat_ratios3),
                               log2)
@@ -197,7 +201,7 @@ peptide2protein_normalization <- function(peptides,
                                           median,
                                           na.rm = TRUE) - median(as.matrix(log2_mat_rat3),
                                                                  na.rm = TRUE)) %>%
-    abs(.) %>% # log2 values of fractions are negative; take absolute values
+    # log2 values may be negative; retain their signs
     as.data.frame() %>%
     rownames_to_column("protein")
 
@@ -205,9 +209,9 @@ peptide2protein_normalization <- function(peptides,
   # create list of results ----
 
   protein_normalized_pepts <- list(
-    # matrix of peptide abundances scaled, after extracting fraction of peptide/protein fraction of abundance
+    # protein-adjusted peptide-abundance proxies, log2 transformed and median centered
     protein_normalized_pepts_scaled = scaled_mat_rat2,
-    # matrix of peptide abundances non-scaled, after extracting fraction of peptide/protein fraction of abundance
+    # protein-adjusted peptide-abundance proxies as peptide/protein ratios before log2 transformation
     protein_normalized_pepts_abundance = pept2prot_norm_ratio,
     # summarized protein abundances based on peptide matrix
     summarized_protein_abundance = prots_q,

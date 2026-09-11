@@ -23,15 +23,15 @@ peptide2protein_normalization(
 \value{
 A list with the following elements
 \describe{
-\item{protein_normalized_pepts_scaled}{Matrix of peptide abundances scaled, after extracting fraction of peptide/protein fraction of abundance}
-\item{protein_normalized_pepts_abundance}{Matrix of peptide abundances non-scaled, after extracting fraction of peptide/protein fraction of abundance}
+\item{protein_normalized_pepts_scaled}{Protein-adjusted peptide-abundance proxies, log2 transformed and median centered}
+\item{protein_normalized_pepts_abundance}{Peptide/protein abundance ratios representing protein-adjusted peptide-abundance proxies, before log2 transformation}
 \item{summarized_protein_abundance}{Summarized protein abundances based on peptide matrix}
 \item{summarized_protein_abundance_scaled}{Summarized protein abundances based on peptide matrix, scaled}
 \item{summarize_by_specificity}{Logical flag indicating if protein abundances were summarized by fully specific peptides}
 }
 }
 \description{
-This is an experimental function for the normalization of peptides abundances against the abundance of their respective proteins. The protein abundances are summarized from the peptide feature abundance information based on fully specific peptides, as a proxy for the protein abundance disregarding the effect of proteolytic activity. Then, peptide-to-protein abundance ratios are calculated based on raw intensities and log2 transformed for downstream processing.
+This experimental function uses summed fully specific peptide abundances (fully tryptic for a trypsin search) as a proxy for parent-protein abundance when summarize_by_specificity = TRUE. Each peptide abundance is divided by its corresponding protein proxy, then log2 transformed and median centered. The output is a protein-adjusted peptide-abundance proxy, not an absolute molecular fraction or a direct measure of protease activity. No external standards, reference samples, control groups, or reference peptide/protein values are required.
 }
 \details{
 Normalize peptide abundances against their respective protein abundances.
