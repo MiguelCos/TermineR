@@ -1,4 +1,4 @@
-# TermineR (development version)
+# TermineR 1.4.4
 
 ## Bug fixes
 
