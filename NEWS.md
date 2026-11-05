@@ -1,3 +1,11 @@
+# TermineR 1.4.4
+
+## Bug fixes
+
+- Fixed P1/P1' residues for fully specific peptides annotated with `sense = "N"`.
+  Both cleavage directions now report residues from the N-terminal peptide bond,
+  consistent with the cleavage coordinates and sequences (#42).
+
 # TermineR 1.4.1
 
 ## Minor improvements

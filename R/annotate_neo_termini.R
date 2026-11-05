@@ -330,14 +330,12 @@ prot2pept2fasta <- left_join(
     p1_residue = case_when(
       p1_position == 0 ~ "N-term",
       specificity != "specific" ~ str_sub(five_res_before, 5, 5),
-      specificity == "specific" & sense == "C" & !is.na(aa_before) ~ aa_before,
-      specificity == "specific" & sense == "N" & !is.na(last_aa) ~ last_aa,
+      specificity == "specific" & !is.na(aa_before) ~ aa_before,
       TRUE ~ NA),
     p1_prime_residue = case_when(
       p1_prime_position == protein_length ~ "C-term",
       specificity != "specific" ~ str_sub(five_res_after, 1, 1),
-      specificity == "specific" & sense == "C" & !is.na(first_aa) ~ first_aa,
-      specificity == "specific" & sense == "N" & !is.na(aa_after) ~ aa_after,
+      specificity == "specific" & !is.na(first_aa) ~ first_aa,
       TRUE ~ NA),
     p1_position_percentage = p1_position / str_length(protein_sequence) * 100,
     met_clipping = case_when(
