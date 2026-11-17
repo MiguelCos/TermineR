@@ -1,3 +1,18 @@
+# TermineR 1.4.5
+
+## Minor improvements
+
+- `annotate_neo_termini()` now labels compatible N-terminal acetyltransferase
+  motifs in `nat_match` and flags potential alternative translation initiation
+  sites in `potential_alt_tis` for acetylated peptides.
+
+## Bug fixes
+
+- `annotate_neo_termini()` now classifies acetylated and free peptides mapped to
+  protein residue 1 as `P1`, even when UniProt or TargetP reports a competing
+  processing match. The resolved annotation distinguishes `Intact_ORF_Acetylated`
+  from `Intact_ORF_free`.
+
 # TermineR 1.4.4
 
 ## Bug fixes
