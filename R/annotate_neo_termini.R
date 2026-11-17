@@ -58,6 +58,11 @@
 #'  \item{processing_type}{Final processing-site classification. Both intact ORF labels are classified as "P1".}
 #'  \item{source_processing_annotation}{Annotation source supporting the final processing-site classification.
 #'                                        The residue-1 calls inferred from the mapped sequence use "Other".}
+#'  \item{nat_match}{Character. N-terminal acetyltransferase motif class for `nterm_modif = "Acetyl"`.
+#'                    `NA` indicates an unmatched motif or a different modification. See Details.}
+#'  \item{potential_alt_tis}{Logical. `TRUE` for acetylated peptides mapped to `peptide_start > 5`
+#'                           with methionine immediately before or at the peptide start (`aa_before`
+#'                           or `first_aa`). Otherwise `FALSE`, including when the peptide is unmapped.}
 #'  \item{protein_sequence}{Protein sequence}
 #'  \item{sample_columns}{Scaled abundances of annotated features per sample}
 #'  \item{caspsites_matches_p1_prime}{Logical. TRUE if a human peptide cleavage position exactly matches a CaspSites P1' position}
@@ -82,6 +87,30 @@
 #' @description
 #' Annotate peptides and associated cleavage events.
 #'
+#' @details
+#' For an acetylated N-terminus, `nat_match` reports the first match among these motifs in this order:
+#' \itemize{
+#'   \item `NatD`: histone-like `SGRG` prefix.
+#'   \item `NatH`: actin-like `DDDI` or `EEEI` prefix.
+#'   \item `NatB`: `MD`, `ME`, `MN`, or `MQ` prefix.
+#'   \item `NatC/E/F`: retained methionine followed by A, F, H, I, K, L, M, S, T, V, W, or Y.
+#'   \item `NatA`: an exposed A, C, G, S, T, or V immediately after a mapped methionine.
+#' }
+#' These sequence motifs indicate compatibility with a substrate class. Confirming enzyme activity
+#' or alternative translation initiation requires independent evidence. The `potential_alt_tis`
+#' flag checks the peptide's N-terminal bond. In a `semi_Cterm` row, the reported cleavage-site
+#' P1 and P1' columns refer to the C-terminal bond.
+#'
+#' @references
+#' \itemize{
+#'   \item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC2688859/}{Arnesen et al. (2009), NatA substrate specificity.}
+#'   \item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC3412031/}{Van Damme et al. (2012), NatB substrate specificity.}
+#'   \item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC5529458/}{Yeom et al. (2017), combined NatC/E/F motif classification.}
+#'   \item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC5098035/}{Van Damme et al. (2016), human NatC substrates and overlap.}
+#'   \item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC3131286/}{Van Damme et al. (2011), NatF substrates and overlap.}
+#'   \item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC4318724/}{Magin et al. (2015), histone recognition by NatD.}
+#'   \item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC5924898/}{Drazic et al. (2018), actin motifs recognized by NatH.}
+#' }
 #'
 #' @export
 #'
@@ -999,6 +1028,21 @@ final_annotated_df <- final_annotated_df %>%
       levels = c("P1", "P2", "SP", "MTS", "cTP", "luTP", "TRANSIT", "PROPEP", "not_canonical")
     )
   ) %>%
+  mutate(
+    nat_match = case_when(
+      !(nterm_modif %in% "Acetyl") ~ NA_character_,
+      stringr::str_starts(peptide, "SGRG") ~ "NatD",
+      stringr::str_starts(peptide, "(?:DDDI|EEEI)") ~ "NatH",
+      stringr::str_starts(peptide, "M[DENQ]") ~ "NatB",
+      stringr::str_starts(peptide, "M[AFHIKLMSTVWY]") ~ "NatC/E/F",
+      aa_before == "M" & first_aa %in% c("A", "C", "G", "S", "T", "V") ~ "NatA"
+    ),
+    # Use the N-terminal bond even when specificity selects the other peptide end.
+    potential_alt_tis = nterm_modif %in% "Acetyl" &
+      !is.na(peptide_start) &
+      peptide_start > 5L &
+      (aa_before %in% "M" | first_aa %in% "M")
+  ) %>%
   dplyr::relocate(
     nterm_modif_peptide,
     nterm_modif,
@@ -1036,6 +1080,7 @@ final_annotated_df <- final_annotated_df %>%
     processing_type_terminer,
     processing_type,
     source_processing_annotation,
+    dplyr::all_of(c("nat_match", "potential_alt_tis")),
     matches_p1_prime,
     caspsites_matches_p1_prime,
     caspsites_p1_position,

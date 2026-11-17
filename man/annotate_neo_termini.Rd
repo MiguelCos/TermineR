@@ -85,6 +85,11 @@ annotation when available, otherwise the UniProt classification.}
 \item{processing_type}{Final processing-site classification. Both intact ORF labels are classified as "P1".}
 \item{source_processing_annotation}{Annotation source supporting the final processing-site classification.
 The residue-1 calls inferred from the mapped sequence use "Other".}
+\item{nat_match}{Character. N-terminal acetyltransferase motif class for \code{nterm_modif = "Acetyl"}.
+\code{NA} indicates an unmatched motif or a different modification. See Details.}
+\item{potential_alt_tis}{Logical. \code{TRUE} for acetylated peptides mapped to \code{peptide_start > 5}
+with methionine immediately before or at the peptide start (\code{aa_before}
+or \code{first_aa}). Otherwise \code{FALSE}, including when the peptide is unmapped.}
 \item{protein_sequence}{Protein sequence}
 \item{sample_columns}{Scaled abundances of annotated features per sample}
 \item{caspsites_matches_p1_prime}{Logical. TRUE if a human peptide cleavage position exactly matches a CaspSites P1' position}
@@ -104,6 +109,30 @@ Annotate peptides and associated cleavage events.
 }
 \details{
 Annotate peptides and associated cleavage events
+
+For an acetylated N-terminus, \code{nat_match} reports the first match among these motifs in this order:
+\itemize{
+\item \code{NatD}: histone-like \code{SGRG} prefix.
+\item \code{NatH}: actin-like \code{DDDI} or \code{EEEI} prefix.
+\item \code{NatB}: \code{MD}, \code{ME}, \code{MN}, or \code{MQ} prefix.
+\item \code{NatC/E/F}: retained methionine followed by A, F, H, I, K, L, M, S, T, V, W, or Y.
+\item \code{NatA}: an exposed A, C, G, S, T, or V immediately after a mapped methionine.
+}
+These sequence motifs indicate compatibility with a substrate class. Confirming enzyme activity
+or alternative translation initiation requires independent evidence. The \code{potential_alt_tis}
+flag checks the peptide's N-terminal bond. In a \code{semi_Cterm} row, the reported cleavage-site
+P1 and P1' columns refer to the C-terminal bond.
+}
+\references{
+\itemize{
+\item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC2688859/}{Arnesen et al. (2009), NatA substrate specificity.}
+\item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC3412031/}{Van Damme et al. (2012), NatB substrate specificity.}
+\item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC5529458/}{Yeom et al. (2017), combined NatC/E/F motif classification.}
+\item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC5098035/}{Van Damme et al. (2016), human NatC substrates and overlap.}
+\item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC3131286/}{Van Damme et al. (2011), NatF substrates and overlap.}
+\item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC4318724/}{Magin et al. (2015), histone recognition by NatD.}
+\item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC5924898/}{Drazic et al. (2018), actin motifs recognized by NatH.}
+}
 }
 \author{
 Miguel Cosenza-Contreras
