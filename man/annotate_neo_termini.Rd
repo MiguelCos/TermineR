@@ -77,9 +77,14 @@ maps to a Uniprot protein ID that does not have processing features information.
 \item{targetp_p1_position}{TargetP predicted P1 cleavage position, when available}
 \item{targetp_matches_p1_prime}{Logical. TRUE if the peptide cleavage position matches the TargetP prediction}
 \item{processing_type_targetp}{Processing type inferred from TargetP}
-\item{processing_type_terminer}{Resolved processing annotation using TargetP when available, otherwise UniProt}
-\item{processing_type}{Final processing-site classification}
-\item{source_processing_annotation}{Annotation source supporting the final processing-site classification}
+\item{processing_type_terminer}{Resolved processing annotation. Peptides mapped to residue 1 are
+labeled "Intact_ORF_Acetylated" for \code{nterm_modif = "Acetyl"}
+or "Intact_ORF_free" for \code{nterm_modif = "n"}, taking precedence
+over TargetP and UniProt. Other rows use a matching TargetP
+annotation when available, otherwise the UniProt classification.}
+\item{processing_type}{Final processing-site classification. Both intact ORF labels are classified as "P1".}
+\item{source_processing_annotation}{Annotation source supporting the final processing-site classification.
+The residue-1 calls inferred from the mapped sequence use "Other".}
 \item{protein_sequence}{Protein sequence}
 \item{sample_columns}{Scaled abundances of annotated features per sample}
 \item{caspsites_matches_p1_prime}{Logical. TRUE if a human peptide cleavage position exactly matches a CaspSites P1' position}

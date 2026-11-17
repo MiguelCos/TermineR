@@ -50,9 +50,14 @@
 #'  \item{targetp_p1_position}{TargetP predicted P1 cleavage position, when available}
 #'  \item{targetp_matches_p1_prime}{Logical. TRUE if the peptide cleavage position matches the TargetP prediction}
 #'  \item{processing_type_targetp}{Processing type inferred from TargetP}
-#'  \item{processing_type_terminer}{Resolved processing annotation using TargetP when available, otherwise UniProt}
-#'  \item{processing_type}{Final processing-site classification}
-#'  \item{source_processing_annotation}{Annotation source supporting the final processing-site classification}
+#'  \item{processing_type_terminer}{Resolved processing annotation. Peptides mapped to residue 1 are
+#'                                     labeled "Intact_ORF_Acetylated" for `nterm_modif = "Acetyl"`
+#'                                     or "Intact_ORF_free" for `nterm_modif = "n"`, taking precedence
+#'                                     over TargetP and UniProt. Other rows use a matching TargetP
+#'                                     annotation when available, otherwise the UniProt classification.}
+#'  \item{processing_type}{Final processing-site classification. Both intact ORF labels are classified as "P1".}
+#'  \item{source_processing_annotation}{Annotation source supporting the final processing-site classification.
+#'                                        The residue-1 calls inferred from the mapped sequence use "Other".}
 #'  \item{protein_sequence}{Protein sequence}
 #'  \item{sample_columns}{Scaled abundances of annotated features per sample}
 #'  \item{caspsites_matches_p1_prime}{Logical. TRUE if a human peptide cleavage position exactly matches a CaspSites P1' position}
@@ -960,11 +965,28 @@ final_annotated_df <- final_annotated_df %>%
     caspsites_evidence_count = dplyr::coalesce(caspsites_evidence_count, 0L)
   )
 
+# Classify the mapped protein start using each peptide's own modification state.
 final_annotated_df <- final_annotated_df %>%
   mutate(
+    processing_type_terminer = case_when(
+      peptide_start == 1L & nterm_modif == "Acetyl" ~ "Intact_ORF_Acetylated",
+      peptide_start == 1L & nterm_modif == "n" ~ "Intact_ORF_free",
+      TRUE ~ processing_type_terminer
+    ),
+    source_processing_annotation = case_when(
+      processing_type_terminer %in% c(
+        "Intact_ORF_Acetylated",
+        "Intact_ORF_free"
+      ) ~ "Other",
+      TRUE ~ source_processing_annotation
+    ),
     processing_type = case_when(
       str_detect(processing_type_terminer, "INIT_MET") ~ "P2",
-      processing_type_terminer == "Intact_ORF" ~ "P1",
+      processing_type_terminer %in% c(
+        "Intact_ORF",
+        "Intact_ORF_Acetylated",
+        "Intact_ORF_free"
+      ) ~ "P1",
       processing_type_terminer == "mTP" ~ "MTS",
       processing_type_terminer == "SIGNAL" ~ "SP",
       processing_type_terminer == "not_canonical_no_procc_annot" ~ "not_canonical",
